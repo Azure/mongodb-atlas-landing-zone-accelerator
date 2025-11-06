@@ -76,7 +76,7 @@ jobs:
 
       - name: Run TFLint
         run: tflint --recursive -f compact
-      
+
       - name: Checkov GitHub Action
         id: checkov
         uses: bridgecrewio/checkov-action@v10
@@ -195,7 +195,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: githubUsername1,githubUsername2 # replace with actual GitHub usernames
+          approvers: luchocarbonell # replace with actual GitHub usernames
           minimum-approvals: 1
           issue-title: "Manual Approval Required for Terraform Apply"
           issue-body: "Please approve or deny the deployment."
@@ -247,7 +247,7 @@ jobs:
           TF_VAR_resource_group_name_tfstate: ${{ vars.TF_VAR_resource_group_name_tfstate }}
           TF_VAR_storage_account_name_tfstate: ${{ vars.TF_VAR_storage_account_name_tfstate }}
           TF_VAR_container_name_tfstate: ${{ vars.TF_VAR_container_name_tfstate }}
-      
+
       - name: Terraform init
         run: terraform init -backend-config=backend.tfbackend
 
