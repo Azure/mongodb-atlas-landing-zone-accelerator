@@ -1,0 +1,27 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+terraform.tfvars
+*.tfplan
+.terraform.lock.hcl
+
+# Sensitive files
+.env
+.env.*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test project build outputs
+test-db-connection/**/bin/
+test-db-connection/**/obj/
+
+## Project local variables
+*local.tfvars
