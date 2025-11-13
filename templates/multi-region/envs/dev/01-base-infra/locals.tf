@@ -1,5 +1,5 @@
 locals {
-  environment  = "dev"
+  environment = "dev"
 
   project_name = var.project_name
 
