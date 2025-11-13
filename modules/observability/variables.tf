@@ -8,6 +8,23 @@ variable "location" {
   type        = string
 }
 
+variable "log_analytics_workspace_sku" {
+  description = "SKU for Log Analytics Workspace"
+  type        = string
+  default     = "PerGB2018"
+}
+
+variable "log_analytics_workspace_name" {
+  description = "Name for Log Analytics Workspace"
+  type        = string
+}
+
+variable "log_analytics_workspace_retention_days" {
+  description = "Retention period in days for Log Analytics Workspace"
+  type        = number
+  default     = 30
+}
+
 variable "app_insights_name" {
   description = "Name for Application Insights instance"
   type        = string
@@ -30,12 +47,6 @@ variable "storage_account_name" {
 
 variable "mongo_atlas_client_id" {
   description = "MongoDB Atlas Public API Key"
-  type        = string
-  sensitive   = true
-}
-
-variable "mongo_atlas_client_secret" {
-  description = "MongoDB Atlas Private API Key"
   type        = string
   sensitive   = true
 }
@@ -104,4 +115,9 @@ variable "mongodb_excluded_metrics" {
   description = "Metrics to exclude for MongoDB monitoring. The value has to be a comma-separated string."
   type        = string
   default     = ""
+}
+
+variable "mongo_atlas_client_secret_kv_uri" {
+  description = "Key Vault Secret URI for Mongo Atlas client secret"
+  type        = string
 }

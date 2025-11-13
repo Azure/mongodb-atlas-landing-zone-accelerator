@@ -17,10 +17,16 @@ This Terraform configuration deploys the foundational infrastructure for MongoDB
 ### Required Manual Configuration
 
 Before running this step, you need to:
+
 **Review Network Configuration**:
 
 * Verify the `region_definitions` in `locals.tf` align with your network design.
 * Ensure the subnet CIDR doesn't conflict with existing subnets.
+
+**Configure Key Vault Access**:
+   - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Key Vault and its secrets can be created successfully.
+   - After resources and secrets have been created, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
+
 
 **Note:** For more information on How to Deploy manually, please follow [Deploy-with-manual-steps](../../../../../docs/wiki/Deploy-with-manual-steps.md).
 
@@ -30,15 +36,35 @@ This configuration creates:
 
 * **MongoDB Atlas Cluster**: Multi-region cluster with backup enabled by default, but it can be turned off if specified.
 * **Virtual Networks**: Dedicated VNets for each region.
-* **Private Subnets**: Subnets for private connectivity in each region.
+* **Private Subnets**: 
+  - Private subnet for MongoDB Atlas connectivity in each region
+  - Function app subnet for observability resources (eastus only)
+  - Private endpoint subnet for secure connections (eastus only)
+* **VNet Peerings**: Connections between VNets across all regions for seamless communication.
 * **Private Endpoints**: Secure connections to MongoDB Atlas in each region.
-* **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources, including Application Insights, Storage Account, Service Plan, Function App, Private DNS Zones, and Private Endpoints. After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API, collect metrics, and send them to Application Insights for monitoring and analysis.
+* **Azure Key Vault**: Secure storage for MongoDB Atlas client secret with:
+  - Network ACL restrictions (configurable via `open_access` variable)
+  - Private endpoint for secure access
+  - Access policy for Function App managed identity
+* **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources (deployed in eastus), including:
+  - Log Analytics Workspace
+  - Application Insights (with Private Link Scope)
+  - Storage Account
+  - Service Plan
+  - Function App (with system-assigned managed identity)
+  - Private DNS Zones
+  - Private Endpoints
+  - After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
 
 ## Validate
 
 * MongoDB Atlas cluster is deployed and healthy across all configured regions.
-* Private Endpoints are approved and in a connected state.
+* Private Endpoints are approved and in a connected state in all regions.
 * DNS resolution from within the VNet returns a private IP for the Atlas FQDN.
+* VNet peerings are successfully established between all regions.
+* Key Vault is deployed and accessible from the Function App subnet (eastus).
+* Key Vault contains the MongoDB Atlas client secret.
+* Function App has Key Vault access policy configured with "Get" permission.
 
 ## Next Steps
 
@@ -61,6 +87,13 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 * **reference\_hour\_of\_day**: Hour of the day for reference, default is `3`.
 * **reference\_minute\_of\_hour**: Minute of the hour for reference, default is `45`.
 * **restore\_window\_days**: Number of days for the restore window, default is `4`.
+
+### Security Settings
+
+- **open_access**: Controls Key Vault network access. Default is `false`.
+  - On the **first run** (resource creation and initial secret injection), set to `true` to allow public access and enable the creation and population of Key Vault secrets.
+  - On the **second and all successive runs**, set to `false` (recommended for production) so that Key Vault restricts access to the specified subnet (Function App subnet).
+- **mongo_atlas_client_secret_expiration**: Expiration date for the MongoDB Atlas client secret stored in Key Vault, default is `2026-01-01T00:00:00Z`.
 
 ### Region Definitions
 
@@ -106,3 +139,5 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 * **vnet\_names**: Names of the virtual networks created.
 * **regions\_values**: Values of the regions configured.
 * **function\_app\_default\_hostname**: Function App default hostname.
+* **key_vault_id**: ID of the Azure Key Vault.
+* **mongo_atlas_client_secret_uri**: URI of the MongoDB Atlas client secret in Key Vault.

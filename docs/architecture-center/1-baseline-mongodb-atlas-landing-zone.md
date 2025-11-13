@@ -27,7 +27,7 @@ In the single-region deployment, all core components—including the MongoDB Atl
 
 The following steps describe the end-to-end workflow for the single-region scenario. Each step corresponds to a numbered element in the architecture diagram:
 
-1. **Application or Service**: Applications or services, are deployed in the subnet with the NSG and the NAT so that they are secured and have visibility to the MongoDB Atlas clusters. These can include web apps, backend services, analytics jobs, or integration tools.
+1. **Application or Service**: Applications or services, are deployed in the subnet with the NSG. These can include web apps, backend services, analytics jobs, or integration tools.
 2. **MongoDB Atlas Cluster**: The MongoDB Atlas clusers are visible through a private endpoint connection and can connect to the applications or services deployed in the secured Virtual Network.
 3. **Observability**: An Azure Function App periodically queries the MongoDB Atlas API to gather database health and performance metrics, which are visualized in Application Insights dashboards.
 
@@ -47,7 +47,7 @@ For organizations with higher requirements for business continuity and disaster 
 
 The following steps outline the multi-region scenario, with numbering matching the architecture diagram:
 
-1. **Application or Service**: Applications or services, are deployed in the subnet with the NSG and the NAT so that they are secured and have visibility to the MongoDB Atlas clusters. These can include web apps, backend services, analytics jobs, or integration tools.
+1. **Application or Service**: Applications or services, are deployed in the subnet with the NSG. These can include web apps, backend services, analytics jobs, or integration tools.
 2. **MongoDB Atlas Cluster**: The MongoDB Atlas clusers are visible through a private endpoint connection and can connect to the applications or services deployed in the secured Virtual Network.
 3. **Observability**: An Azure Function App periodically queries the MongoDB Atlas API to gather database health and performance metrics, which are visualized in Application Insights dashboards.
 4. **Resiliency**: VNet Peering is enabled so that in case of a regional outage, all remaining regions have visibility to the rest of the MongoDB Atlas clusters.
@@ -64,7 +64,7 @@ The architecture brings together several core components to deliver security, sc
 
 - **MongoDB Atlas (Managed Service)**: Provides managed database clusters with automated backups, high availability, and optional multi-region deployment. Atlas role-based access control (RBAC) ensures fine-grained data security.
 - **Azure Virtual Networks and Private Endpoints**: Ensure all communications between Azure resources and MongoDB Atlas are private and encrypted, never traversing the public internet.
-- **Network Security Groups (NSGs) and NAT Gateways**: Enforce network segmentation and secure outbound connectivity.
+- **Network Security Groups (NSGs)**: Enforce network segmentation.
 - **Observability**: Azure Application Insights and Function Apps provide centralized monitoring and operational visibility.
 - **Infrastructure Automation**: Terraform modules and GitHub Actions enable infrastructure as code, automation, and repeatable deployments.
 
@@ -108,7 +108,7 @@ When implementing VNet peering for MongoDB Atlas connectivity, consider the foll
 > - [Defender for Servers](https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-servers-overview)
 > - [Microsoft Entra Global Secure Access (GSA)](https://learn.microsoft.com/en-us/entra/global-secure-access/overview-what-is-global-secure-access)
 
-**Note**: Azure Key Vault or Atlas secrets management can be integrated to secure application credentials.
+**Note**: Azure Key Vault can be integrated to secure application credentials. This is recommended for storing sensitive information such as MongoDB credentials, including private and public keys, and connection strings (e.g., for MongoDB or Application Insights).
 
 ---
 
@@ -143,13 +143,22 @@ The *Landing Zone for MongoDB Atlas on Azure* includes a monitoring component, a
 
 Please reference the [How to Monitor MongoDB](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor) article for more information about:
 
-- **Scan and order**
-- **Query targeting**
-- **Normalized System CPU**
-- **Namespace Insights**
-- **Query Profiler**
-- **Performance Advisor**
-- **Billing Cost Explorer**
+- [Scan and order](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#1-scan-and-order)
+- [Query targeting](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#2-query-targeting)
+- [Normalized System CPU](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#3-normalized-system-cpu)
+- [Performance Advisor](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#4-performance-advisor)
+- [Namespace Insights](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#5-namespace-insights)
+- [Query Profiler](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#6-query-profiler)
+- [Billing Cost Explorer](https://www.mongodb.com/resources/products/capabilities/how-to-monitor-mongodb-and-what-metrics-to-monitor#7-billing-cost-explorer)
+
+Monitoring MongoDB databases allows you to improve the performance of your application stack and optimize for costs by enabling you to:
+
+- Understand the current capacity of your database
+- Observe how utilized resources are
+- Observe the presence of abnormal behavior and performance issues
+- Detect and react to real-time issues
+
+Good or bad signals for your cluster are largely relative to your baseline cluster activity and whether you are experiencing predictable or abnormal behavior.
 
 Also, we recommend to configure **Project Alerts** to notify on metric drift from your baseline (e.g., rising query targeting, any scan-and-order, or normalized CPU sustained >70% or <40%). For more information, check out the [Monitoring and Alerts](https://www.mongodb.com/docs/atlas/monitoring-alerts/) article.
 

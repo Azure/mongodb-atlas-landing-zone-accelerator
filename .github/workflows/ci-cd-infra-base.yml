@@ -160,6 +160,7 @@ jobs:
           TF_VAR_project_name: ${{ vars.TF_VAR_project_name }}
           TF_VAR_key_name_tfstate: ${{ vars.TF_VAR_key_name_tfstate }}
           TF_VAR_key_name_infra_tfstate: ${{ vars.TF_VAR_key_name_infra_tfstate }}
+          TF_VAR_open_access: ${{ vars.TF_VAR_open_access }}
 
       - name: Post plan comment
         uses: GetTerminus/terraform-pr-commenter@v3.0.3
@@ -195,7 +196,7 @@ jobs:
         uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: luchocarbonell # replace with actual GitHub usernames
+          approvers: githubUsername1,githubUsername2 # replace with actual GitHub usernames
           minimum-approvals: 1
           issue-title: "Manual Approval Required for Terraform Apply"
           issue-body: "Please approve or deny the deployment."
@@ -267,3 +268,4 @@ jobs:
           TF_VAR_container_name_tfstate: ${{ vars.TF_VAR_container_name_tfstate }}
           TF_VAR_key_name_tfstate: ${{ vars.TF_VAR_key_name_tfstate }}
           TF_VAR_key_name_infra_tfstate: ${{ vars.TF_VAR_key_name_infra_tfstate }}
+          TF_VAR_open_access: ${{ vars.TF_VAR_open_access }}

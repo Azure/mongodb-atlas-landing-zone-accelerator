@@ -15,3 +15,7 @@ resource_group_name_tfstate  = ""
 storage_account_name_tfstate = ""
 container_name_tfstate       = ""
 key_name_tfstate             = ""
+
+# Keyvault configuration 
+# Set to true to allow public access to Key Vault (Only on first run/resource creation)
+open_access = false

@@ -24,7 +24,7 @@ module "vnet_peering" {
   vnet_id_this              = "vnet-id-this"
   vnet_id_peer              = "vnet-id-peer"
 
-  allow_forwarded_traffic   = true
+  allow_forwarded_traffic   = false
   allow_gateway_transit     = false
   use_remote_gateways       = false
 }

@@ -1,129 +1,76 @@
-variable "public_ip_name" {
-  description = "The name of the public IP resource."
-  type        = string
-}
-
-variable "nat_gateway_name" {
-  description = "The name of the NAT gateway resource."
-  type        = string
+variable "subnets" {
+  description = "Map of subnet configurations. Keys are static subnet IDs; values contain name, address_prefixes, delegation, service_endpoints."
+  type = map(object({
+    name             = string
+    address_prefixes = list(string)
+    delegation = optional(object({
+      name = string
+      service_delegation = object({
+        name    = string
+        actions = list(string)
+      })
+    }))
+    service_endpoints = optional(list(string))
+  }))
 }
 
 variable "nsg_name" {
-  description = "The name of the network security group."
-  type        = string
-}
-variable "vnet_name" {
-  description = "Name of the virtual network."
+  description = "Name of the Network Security Group"
   type        = string
 }
 
 variable "location" {
-  description = "Azure region for all network resources."
+  description = "Azure location for resources"
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Resource group where the network resources are deployed."
+  description = "Azure Resource Group name"
+  type        = string
+}
+
+variable "vnet_name" {
+  description = "Virtual Network name"
   type        = string
 }
 
 variable "address_space" {
-  description = "Address space for the virtual network."
+  description = "Address space for the Virtual Network"
   type        = list(string)
 }
 
 variable "tags" {
-  description = "Tags to apply to all network resources."
+  description = "Tags for resources"
   type        = map(string)
+  default     = {}
 }
 
-variable "private_subnet_name" {
-  description = "Name of the private subnet."
-  type        = string
-}
-
-variable "private_subnet_prefixes" {
-  description = "Address prefixes for the private subnet."
-  type        = list(string)
-}
-
-# Private Endpoint variables
-variable "private_endpoint_name" {
-  description = "Name of the private endpoint for MongoDB."
-  type        = string
-}
-
-variable "private_service_connection_name" {
-  description = "Name of the private service connection."
-  type        = string
-}
-
-variable "manual_connection" {
-  description = "Whether the private endpoint requires manual approval."
-  type        = bool
-  default     = false
-}
-
-variable "private_connection_resource_id" {
-  description = "The resource ID of the private connection"
-  type        = string
-}
-
-variable "request_message" {
-  description = "Message for manual private endpoint connection approval."
-  type        = string
-  default     = "Please approve this connection for MongoDB Atlas Private Endpoint."
+variable "private_endpoints" {
+  description = "Map of private endpoint objects. Only set for the subnets that need them."
+  type = map(object({
+    name                    = string
+    subnet_key              = string
+    service_connection_name = string
+    service_resource_id     = string
+    is_manual_connection    = bool
+    group_ids               = optional(list(string))
+    request_message         = optional(string)
+    tags                    = optional(map(string))
+  }))
+  default = {}
 }
 
 variable "project_id" {
-  description = "The ID of the MongoDB Atlas project"
+  description = "MongoDB Atlas project id"
   type        = string
 }
 
 variable "private_link_id" {
-  description = "Atlas Private Link ID."
-  type        = any
-}
-
-
-// Observability variables
-variable "deploy_observability_subnets" {
-  description = "True to deploy networking subnets for observability, false to skip."
-  type        = bool
-}
-
-variable "observability_function_app_subnet_name" {
-  description = "Name of the Function App subnet."
+  description = "MongoDB Atlas private link id"
   type        = string
-  validation {
-    condition     = var.deploy_observability_subnets ? length(var.observability_function_app_subnet_name) > 0 : true
-    error_message = "If deploy_observability_subnets is true, observability_function_app_subnet_name must be provided."
-  }
 }
 
-variable "observability_function_app_subnet_prefixes" {
-  description = "Address prefixes for the Function App subnet."
-  type        = list(string)
-  validation {
-    condition     = var.deploy_observability_subnets ? length(var.observability_function_app_subnet_prefixes) > 0 : true
-    error_message = "If deploy_observability_subnets is true, observability_function_app_subnet_prefixes must be provided."
-  }
-}
-
-variable "observability_private_endpoint_subnet_name" {
-  description = "Name of the Private Endpoint subnet."
+variable "mongodb_pe_endpoint_key" {
+  description = "The key in private_endpoints map for the MongoDB endpoint"
   type        = string
-  validation {
-    condition     = var.deploy_observability_subnets ? length(var.observability_private_endpoint_subnet_name) > 0 : true
-    error_message = "If deploy_observability_subnets is true, observability_private_endpoint_subnet_name must be provided."
-  }
-}
-
-variable "observability_private_endpoint_subnet_prefixes" {
-  description = "Address prefixes for the Private Endpoint subnet."
-  type        = list(string)
-  validation {
-    condition     = var.deploy_observability_subnets ? length(var.observability_private_endpoint_subnet_prefixes) > 0 : true
-    error_message = "If deploy_observability_subnets is true, observability_private_endpoint_subnet_prefixes must be provided."
-  }
 }

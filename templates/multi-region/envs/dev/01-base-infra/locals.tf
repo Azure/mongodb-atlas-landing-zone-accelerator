@@ -1,5 +1,5 @@
 locals {
-  environment = "dev"
+  environment  = "dev"
 
   project_name = var.project_name
 
@@ -28,28 +28,43 @@ locals {
       priority                                       = 7
       address_space                                  = ["10.0.0.0/26"]
       private_subnet_prefixes                        = ["10.0.0.0/29"]
-      deploy_observability_subnets                   = true
       observability_function_app_subnet_prefixes     = ["10.0.0.8/29"]
       observability_private_endpoint_subnet_prefixes = ["10.0.0.16/28"]
+      observability_storage_account_subnet_prefixes  = ["10.0.0.32/28"]
+      keyvault_private_endpoint_subnet_prefixes      = ["10.0.0.48/28"]
+      private_subnet_name                            = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus"
+      observability_function_app_subnet_name         = "${module.naming.subnet.name_unique}-function-app-eastus"
+      observability_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-observability-private-endpoint-eastus"
+      keyvault_private_endpoint_subnet_name          = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus"
+      observability_storage_account_subnet_name      = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus"
+      deploy_observability_subnets                   = true
+      has_keyvault_private_endpoint                  = true
+      has_observability_storage_account              = true
       node_count                                     = 2
     }
     eastus2 = {
-      atlas_region                 = "US_EAST_2"
-      azure_region                 = "eastus2"
-      priority                     = 6
-      address_space                = ["10.0.0.64/28"]
-      private_subnet_prefixes      = ["10.0.0.64/29"]
-      deploy_observability_subnets = false
-      node_count                   = 2
+      atlas_region                      = "US_EAST_2"
+      azure_region                      = "eastus2"
+      priority                          = 6
+      address_space                     = ["10.0.0.64/28"]
+      private_subnet_prefixes           = ["10.0.0.64/29"]
+      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
+      deploy_observability_subnets      = false
+      has_keyvault_private_endpoint     = false
+      has_observability_storage_account = false
+      node_count                        = 2
     }
     westus = {
-      atlas_region                 = "US_WEST"
-      azure_region                 = "westus"
-      priority                     = 5
-      address_space                = ["10.0.0.80/28"]
-      private_subnet_prefixes      = ["10.0.0.80/29"]
-      deploy_observability_subnets = false
-      node_count                   = 1
+      atlas_region                      = "US_WEST"
+      azure_region                      = "westus"
+      priority                          = 5
+      address_space                     = ["10.0.0.80/28"]
+      private_subnet_prefixes           = ["10.0.0.80/29"]
+      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-westus"
+      deploy_observability_subnets      = false
+      has_keyvault_private_endpoint     = false
+      has_observability_storage_account = false
+      node_count                        = 1
     }
   }
 
@@ -72,10 +87,19 @@ locals {
       location                                       = v.azure_region
       address_space                                  = v.address_space
       private_subnet_prefixes                        = v.private_subnet_prefixes
+      private_subnet_name                            = v.private_subnet_name
       manual_connection                              = true
       deploy_observability_subnets                   = v.deploy_observability_subnets
+      has_keyvault_private_endpoint                  = v.has_keyvault_private_endpoint
+      has_observability_storage_account              = v.has_observability_storage_account
       observability_function_app_subnet_prefixes     = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
       observability_private_endpoint_subnet_prefixes = v.deploy_observability_subnets ? v.observability_private_endpoint_subnet_prefixes : null
+      observability_function_app_subnet_name         = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
+      observability_private_endpoint_subnet_name     = v.deploy_observability_subnets ? v.observability_private_endpoint_subnet_name : null
+      keyvault_private_endpoint_subnet_prefixes      = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_prefixes : null
+      keyvault_private_endpoint_subnet_name          = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_name : null
+      observability_storage_account_subnet_prefixes  = v.has_observability_storage_account ? v.observability_storage_account_subnet_prefixes : null
+      observability_storage_account_subnet_name      = v.has_observability_storage_account ? v.observability_storage_account_subnet_name : null
     }
   }
 
@@ -83,6 +107,8 @@ locals {
   pair_list  = flatten([for i, a in local.vnet_keys : [for j, b in local.vnet_keys : { key = "${a}|${b}", a = a, b = b } if i < j]])
   vnet_pairs = { for p in local.pair_list : p.key => { a = p.a, b = p.b } }
 
-  mongo_atlas_client_id     = var.mongo_atlas_client_id
-  mongo_atlas_client_secret = var.mongo_atlas_client_secret
+  mongo_atlas_client_id                = var.mongo_atlas_client_id
+  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  now                                  = timestamp()
+  mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
 }

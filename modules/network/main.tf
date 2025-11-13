@@ -6,93 +6,58 @@ resource "azurerm_virtual_network" "this" {
   tags                = var.tags
 }
 
-resource "azurerm_subnet" "private" {
-  name                 = var.private_subnet_name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = var.private_subnet_prefixes
-}
-
-resource "azurerm_public_ip" "nat_ip" {
-  name                = var.public_ip_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
-resource "azurerm_nat_gateway" "nat" {
-  name                = var.nat_gateway_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku_name            = "Standard"
-}
-
-resource "azurerm_nat_gateway_public_ip_association" "nat_assoc" {
-  nat_gateway_id       = azurerm_nat_gateway.nat.id
-  public_ip_address_id = azurerm_public_ip.nat_ip.id
-}
-
-resource "azurerm_subnet_nat_gateway_association" "assoc" {
-  subnet_id      = azurerm_subnet.private.id
-  nat_gateway_id = azurerm_nat_gateway.nat.id
-}
-
 resource "azurerm_network_security_group" "nsg" {
   name                = var.nsg_name
   location            = var.location
   resource_group_name = var.resource_group_name
+  tags                = var.tags
 }
 
-resource "azurerm_subnet_network_security_group_association" "private_subnet_nsg" {
-  subnet_id                 = azurerm_subnet.private.id
+resource "azurerm_subnet" "subnets" {
+  for_each             = { for k, v in var.subnets : k => v if v != null }
+  name                 = each.value.name
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.this.name
+  address_prefixes     = each.value.address_prefixes
+
+  dynamic "delegation" {
+    for_each = (try(each.value.delegation, null) == null) ? [] : [each.value.delegation]
+    content {
+      name = delegation.value.name
+      service_delegation {
+        name    = delegation.value.service_delegation.name
+        actions = delegation.value.service_delegation.actions
+      }
+    }
+  }
+  service_endpoints = try(each.value.service_endpoints, [])
+}
+
+resource "azurerm_subnet_network_security_group_association" "nsg_association" {
+  for_each                  = azurerm_subnet.subnets
+  subnet_id                 = each.value.id
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_private_endpoint" "mongodb" {
-  name                = var.private_endpoint_name
+resource "azurerm_private_endpoint" "pe" {
+  for_each            = var.private_endpoints
+  name                = each.value.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  subnet_id           = azurerm_subnet.private.id
-  tags                = var.tags
-
+  subnet_id           = azurerm_subnet.subnets[each.value.subnet_key].id
+  tags                = try(each.value.tags, var.tags)
   private_service_connection {
-    name                           = var.private_service_connection_name
-    private_connection_resource_id = var.private_connection_resource_id
-    is_manual_connection           = var.manual_connection
-    request_message                = var.request_message
+    name                           = each.value.service_connection_name
+    private_connection_resource_id = each.value.service_resource_id
+    is_manual_connection           = each.value.is_manual_connection
+    request_message                = try(each.value.request_message, null)
   }
 }
 
 resource "mongodbatlas_privatelink_endpoint_service" "endpoint_service" {
   project_id                  = var.project_id
   private_link_id             = var.private_link_id
-  endpoint_service_id         = azurerm_private_endpoint.mongodb.id
-  private_endpoint_ip_address = azurerm_private_endpoint.mongodb.private_service_connection[0].private_ip_address
+  endpoint_service_id         = azurerm_private_endpoint.pe[var.mongodb_pe_endpoint_key].id
+  private_endpoint_ip_address = azurerm_private_endpoint.pe[var.mongodb_pe_endpoint_key].private_service_connection[0].private_ip_address
   provider_name               = "AZURE"
-}
-
-// Observability subnets
-resource "azurerm_subnet" "observability_function_app_subnet" {
-  count                = var.deploy_observability_subnets ? 1 : 0
-  name                 = var.observability_function_app_subnet_name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = var.observability_function_app_subnet_prefixes
-
-  delegation {
-    name = "functionapp-delegation"
-    service_delegation {
-      name    = "Microsoft.App/environments"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
-}
-
-resource "azurerm_subnet" "observability_private_endpoint_subnet" {
-  count                = var.deploy_observability_subnets ? 1 : 0
-  name                 = var.observability_private_endpoint_subnet_name
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.this.name
-  address_prefixes     = var.observability_private_endpoint_subnet_prefixes
 }
