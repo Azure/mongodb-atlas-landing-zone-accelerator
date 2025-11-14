@@ -107,8 +107,11 @@ locals {
   pair_list  = flatten([for i, a in local.vnet_keys : [for j, b in local.vnet_keys : { key = "${a}|${b}", a = a, b = b } if i < j]])
   vnet_pairs = { for p in local.pair_list : p.key => { a = p.a, b = p.b } }
 
-  mongo_atlas_client_id                = var.mongo_atlas_client_id
-  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  mongo_atlas_client_id     = var.mongo_atlas_client_id
+  mongo_atlas_client_secret = var.mongo_atlas_client_secret
+  # Keyvault
   now                                  = timestamp()
   mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
+  purge_protection_enabled             = true
+  soft_delete_retention_days           = 7
 }

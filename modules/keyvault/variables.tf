@@ -60,3 +60,15 @@ variable "private_service_connection_name" {
   description = "Name for the private service connection"
   type        = string
 }
+
+variable "purge_protection_enabled" {
+  description = "Whether purge protection is enabled for Key Vault. In production, this should be true."
+  type        = bool
+  default     = true
+}
+
+variable "soft_delete_retention_days" {
+  description = "Number of days that deleted Key Vaults are retained. Must be between 7 and 90."
+  type        = number
+  default     = 7
+}

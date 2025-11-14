@@ -124,5 +124,3 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 - **atlas_pe_service_id**: ID of the Atlas private endpoint service.
 - **atlas_privatelink_endpoint_id**: ID of the Atlas private link endpoint.
 - **function_app_default_hostname**: Function App default hostname.
-- **key_vault_id**: ID of the Azure Key Vault.
-- **mongo_atlas_client_secret_uri**: URI of the MongoDB Atlas client secret in Key Vault.

@@ -4,8 +4,8 @@ resource "azurerm_key_vault" "self" {
   resource_group_name        = var.resource_group_name
   tenant_id                  = var.tenant_id
   sku_name                   = "standard"
-  purge_protection_enabled   = true
-  soft_delete_retention_days = 7
+  purge_protection_enabled   = var.purge_protection_enabled
+  soft_delete_retention_days = var.soft_delete_retention_days
 
   network_acls {
     # If open_access is true, allow all; if false, restrict to VNet subnets

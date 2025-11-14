@@ -37,7 +37,7 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
   - Path: `envs/dev/00-devops/` (single- or multi-region as appropriate)
   - For details on this manual step, see [DevOps Setup (Manual Prerequisite)](./Deploy-with-manual-steps.md#devops-setup-manual-prerequisite).
 - **Pipeline Environment Variables:**  
-  After running step 00-devops, set all required environment variables and GitHub secrets using the outputs. See [Setup-environment.md](Setup-environment.md#GitHub-Environment) for details.
+  After running step 00-devops, set all required environment variables and GitHub secrets using the outputs. See [Setup-environment.md](Setup-environment.md#github-environment-requirements) for details.
 
 ---
 

@@ -139,5 +139,3 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 * **vnet\_names**: Names of the virtual networks created.
 * **regions\_values**: Values of the regions configured.
 * **function\_app\_default\_hostname**: Function App default hostname.
-* **key_vault_id**: ID of the Azure Key Vault.
-* **mongo_atlas_client_secret_uri**: URI of the MongoDB Atlas client secret in Key Vault.

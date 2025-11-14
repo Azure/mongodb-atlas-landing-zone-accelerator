@@ -36,8 +36,11 @@ locals {
   reference_minute_of_hour = 45
   restore_window_days      = 4
 
-  mongo_atlas_client_id                = var.mongo_atlas_client_id
-  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  mongo_atlas_client_id     = var.mongo_atlas_client_id
+  mongo_atlas_client_secret = var.mongo_atlas_client_secret
+  # Keyvault
   now                                  = timestamp()
   mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
+  purge_protection_enabled             = true
+  soft_delete_retention_days           = 7
 }

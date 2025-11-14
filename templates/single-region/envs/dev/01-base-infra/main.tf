@@ -95,6 +95,8 @@ module "kv" {
   private_endpoint_subnet_id           = module.network.subnet_ids["keyvault_private_endpoint"]
   private_endpoint_name                = "${module.naming.private_endpoint.name_unique}kv"
   private_service_connection_name      = "${module.naming.private_service_connection.name_unique}kv"
+  purge_protection_enabled             = local.purge_protection_enabled
+  soft_delete_retention_days           = local.soft_delete_retention_days
 }
 
 module "observability" {
