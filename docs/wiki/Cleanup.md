@@ -1,6 +1,6 @@
 # Cleanup Guide
 
-Follow these steps to safely and completely clean up all resources provisioned by this Terraform solution.
+Follow these steps to safely and completely clean up all resources provisioned through this deployment guide.
 
 ---
 
