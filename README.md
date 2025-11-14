@@ -1,5 +1,15 @@
 # Terraform Landing Zone for MongoDB Atlas on Azure
 
+## Solution Overview
+
+This repository provides a modular Terraform solution for deploying a secure MongoDB Atlas environment on Azure, featuring:
+
+- Private networking and secure connectivity
+- DevOps automation for remote state and identity
+- End-to-end cluster setup for MongoDB Atlas
+- Observability and monitoring with Azure Application Insights and a Metrics Function App
+- Automated infrastructure provisioning, Atlas cluster configuration, and a test application for validation
+
 > [!IMPORTANT]
 > The Terraform Landing Zone for MongoDB Atlas on Azure assumes that you already successfully implemented an Azure landing zone. However, you can use the Terraform Landing Zone for MongoDB Atlas on Azure if your infrastructure doesn't conform to Azure landing zones. For more information, refer to [Cloud Adoption Framework enterprise-scale landing zones](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/enterprise-scale/)
 >
@@ -14,58 +24,40 @@
 
 ## Get Started: Deployment Steps
 
-### 1. Decide How to Deploy
+### 1. Review and Select Desired Architecture
 
-- **Automated (Recommended):**
-  Deploy through GitHub Actions CI/CD workflows for full automation. Follow the [Pipeline Deployment Guide](docs/wiki/Deploy-with-pipeline.md).
+Before deploying, determine the architecture that best fits your requirements and understand the modules involved:
 
-- **Manual:**
-  Run Terraform and supporting scripts directly. See [Manual Deployment Steps](docs/wiki/Deploy-with-manual-steps.md).
+- **Reference example architectures:**
+  - **Single Region:**
+    ![Single Region Architecture](docs/images/architecture-single-region.png)
+  - **Multi Region:**
+    ![Multi Region Architecture](docs/images/architecture-multi-region.png)
+- **Learn more:**
+  - Read about [available Terraform modules and their usage](./docs/wiki/Modules.md) to see which modules to compose.
 
 ### 2. Prepare Your Environment
 
 - Review and configure [environment prerequisites](docs/wiki/Prerequisites.md).
 - Configure required environment variables: [Setup Environment Guide](docs/wiki/Setup-environment.md).
 
-### 3. Review Architecture and Modules
+### 3. Decide How to Deploy
 
-- Understand available [Terraform modules and their usage](./docs/wiki/Modules.md).
-- Reference example architectures:
-  - **Single Region:**
-    ![Single Region Architecture](docs/images/architecture-single-region.png)
-  - **Multi Region:**
-    ![Multi Region Architecture](docs/images/architecture-multi-region.png)
+- **Automated (Recommended):**
+  - Deploy through GitHub Actions CI/CD workflows for full automation. Follow the [Pipeline Deployment Guide](docs/wiki/Deploy-with-pipeline.md).
+- **Manual:**
+  - Run Terraform and supporting scripts directly. See [Manual Deployment Steps](docs/wiki/Deploy-with-manual-steps.md).
 
 ### 4. Choose Your Deployment Pattern
 
-- **Single-region** and **multi-region** patterns are supported across both automated and manual options.
+- Both **single-region** and **multi-region** patterns are supported across automated and manual deployment options.
 
----
+### 5. Clean Up Resources
 
-## Solution Overview
+To avoid unexpected charges, **always clean up resources when you're done**.
 
-This repository provides a modular Terraform solution for deploying a secure MongoDB Atlas environment on Azure, featuring:
+See [CLEANUP.md](docs/wiki/Cleanup.md) for the full step-by-step cleanup procedure, including how to destroy Azure and MongoDB Atlas resources in the correct order.
 
-- Private networking and secure connectivity
-- DevOps automation for remote state and identity
-- End-to-end cluster setup for MongoDB Atlas
-- Observability and monitoring with Azure Application Insights and a Metrics Function App
-- Automated infrastructure provisioning, Atlas cluster configuration, and a test application for validation
-
----
-
-## Module Overview
-
-For details on specific modules, refer to [Modules.md](./docs/wiki/Modules.md):
-
-- [Application](./modules/application/readme.md): App Service Plan, Web App, VNet integration
-- [DevOps](./modules/devops/readme.md): Remote state, identity, automation
-- [MongoDB Atlas Config Single Region](./modules/atlas_config_single_region/readme.md): Atlas project, cluster, PrivateLink (single region)
-- [MongoDB Atlas Config Multi Region](./modules/atlas_config_multi_region/readme.md): Atlas project, cluster, PrivateLink (multi-region)
-- [MongoDB Marketplace](./modules/mongodb_marketplace/readme.md): Atlas org deployment via Azure Marketplace
-- [Network](./modules/network/readme.md): VNet, subnets, NSG, private endpoints
-- [VNet Peering](./modules/vnet_peering/readme.md): Network peering for multi-region
-- [Observability](./modules/observability/readme.md): Application Insights, metrics, monitoring
 
 ---
 

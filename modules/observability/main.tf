@@ -15,6 +15,7 @@ resource "azurerm_application_insights" "observability_appinsights" {
   internet_ingestion_enabled = false
 }
 
+# Unable to use Managed Identity in the azurerm_function_app_flex_consumption resource due to a Terraform provider bug (https://github.com/hashicorp/terraform-provider-azurerm/issues/30732). In production, implement proper authentication using Entra ID and not pre-shared keys. Disable key-based access on the Storage account.
 resource "azurerm_storage_account" "observability_function_storage" {
   name                            = var.storage_account_name
   resource_group_name             = var.resource_group_name
