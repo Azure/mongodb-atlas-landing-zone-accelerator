@@ -6,3 +6,7 @@ output "observability_function_default_hostname" {
   value       = azurerm_function_app_flex_consumption.observability_function.default_hostname
   description = "Default hostname for the observability function app."
 }
+
+output "function_app_identity_principal_id" {
+  value = azurerm_function_app_flex_consumption.observability_function.identity[0].principal_id
+}

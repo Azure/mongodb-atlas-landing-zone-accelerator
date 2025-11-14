@@ -21,6 +21,7 @@ Include this module in your Terraform configuration and provide all required var
 module "observability" {
   source                        = "./modules/observability"
   app_insights_name             = "<your-app-insights-name>"
+  log_analytics_workspace_name  = "<your-law-name>"
   location                      = "<azure-region>"
   resource_group_name           = "<resource-group-name>"
   storage_account_name          = "<storage-account-name>"
@@ -50,6 +51,7 @@ module "observability" {
 | Name                          | Description                                                                 | Type   | Required |
 |-------------------------------|-----------------------------------------------------------------------------|--------|----------|
 | app_insights_name             | Name for Application Insights                                                | string | yes      |
+| log_analytics_workspace_name  | Name for Log Analytics workspace                                             | string | yes      |
 | location                      | Azure region for resources                                                   | string | yes      |
 | resource_group_name           | Resource group name                                                          | string | yes      |
 | storage_account_name          | Name for the storage account                                                 | string | yes      |

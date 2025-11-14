@@ -8,7 +8,6 @@ This Terraform module provisions core networking resources in Azure and MongoDB 
 
 - Virtual Network (VNet)
 - Private Subnet
-- NAT Gateway and Public IP
 - Network Security Group (NSG)
 - Private Endpoint for MongoDB Atlas (with Atlas PrivateLink integration)
 - Subnets for observability
@@ -26,8 +25,6 @@ module "network" {
   private_subnet_name             = "snet-private"
   private_subnet_prefixes         = ["10.0.1.0/24"]
   name_prefix                     = "myapp"
-  public_ip_name                  = "pip-myapp"
-  nat_gateway_name                = "nat-myapp"
   nsg_name                        = "nsg-myapp"
   private_endpoint_name           = "pe-myapp"
   private_service_connection_name = "psc-myapp"
@@ -60,10 +57,8 @@ module "network" {
 | `address_space`             | Address space for the VNet                                | `list(string)` |
 | `private_subnet_name`       | Name of the private subnet                                | `string`       |
 | `private_subnet_prefixes`   | Address prefixes for the private subnet                   | `list(string)` |
-| `name_prefix`               | Prefix for naming NAT, NSG, and Public IP resources       | `string`       |
+| `name_prefix`               | Prefix for naming NSG                                     | `string`       |
 | `tags`                      | Tags to apply to all resources                            | `map(string)`  |
-| `public_ip_name`            | Name of the public IP resource                            | `string`       |
-| `nat_gateway_name`          | Name of the NAT gateway resource                          | `string`       |
 | `nsg_name`                  | Name of the network security group                        | `string`       |
 | `private_endpoint_name`     | Name of the private endpoint for MongoDB                  | `string`       |
 | `private_service_connection_name` | Name of the private service connection              | `string`       |
@@ -84,8 +79,6 @@ module "network" {
 - **vnet\_id**: ID of the Virtual Network.
 - **vnet\_name**: Name of the Virtual Network.
 - **private\_subnet\_id**: ID of the private subnet.
-- **nat\_gateway\_id**: ID of the NAT Gateway.
-- **nat\_gateway\_public\_ip**: Public IP address of the NAT Gateway.
 - **private\_subnet\_nsg\_id**: ID of the NSG associated with the subnet.
 - **private\_endpoint\_id**: ID of the MongoDB private endpoint.
 - **observability\_function\_app\_subnet\_id**: ID of the Function App subnet.

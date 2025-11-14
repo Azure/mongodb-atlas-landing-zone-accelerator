@@ -1,44 +1,20 @@
+
+output "subnet_ids" {
+  value = { for k, v in azurerm_subnet.subnets : k => v.id }
+}
+
+output "nsg_id" {
+  value = azurerm_network_security_group.nsg.id
+}
+
 output "vnet_id" {
-  description = "ID of the Virtual Network"
-  value       = azurerm_virtual_network.this.id
+  value = azurerm_virtual_network.this.id
 }
 
 output "vnet_name" {
-  description = "Name of the Virtual Network"
-  value       = azurerm_virtual_network.this.name
+  value = azurerm_virtual_network.this.name
 }
 
-output "private_subnet_id" {
-  description = "ID of the private subnet"
-  value       = azurerm_subnet.private.id
-}
-
-output "nat_gateway_id" {
-  description = "ID of the NAT Gateway"
-  value       = azurerm_nat_gateway.nat.id
-}
-
-output "nat_gateway_public_ip" {
-  description = "Public IP of the NAT Gateway"
-  value       = azurerm_public_ip.nat_ip.ip_address
-}
-
-output "private_subnet_nsg_id" {
-  description = "ID of the NSG associated with the private subnet"
-  value       = azurerm_network_security_group.nsg.id
-}
-
-output "private_endpoint_id" {
-  description = "ID of the MongoDB private endpoint"
-  value       = azurerm_private_endpoint.mongodb.id
-}
-
-output "observability_function_app_subnet_id" {
-  description = "ID of the Function App subnet"
-  value       = var.deploy_observability_subnets ? azurerm_subnet.observability_function_app_subnet[0].id : null
-}
-
-output "observability_private_endpoint_subnet_id" {
-  description = "ID of the Private Endpoint subnet"
-  value       = var.deploy_observability_subnets ? azurerm_subnet.observability_private_endpoint_subnet[0].id : null
+output "private_endpoint_ids" {
+  value = { for k, v in azurerm_private_endpoint.pe : k => v.id }
 }

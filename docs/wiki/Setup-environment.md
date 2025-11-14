@@ -73,35 +73,58 @@ These `local.tfvars` files will be used when deploying with manual steps.
 
 ### GitHub Environment Requirements
 
-You must create a GitHub environment named `dev` in your repository settings. See the [Creating a GitHub Environment](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#creating-an-environment) documentation for instructions.
+Before running the pipeline, you must create a GitHub environment named `dev` in your repository settings.  
+Follow the official [Creating a GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) guide for detailed instructions.
 
-In this environment, set the following:
+---
 
-- **Secrets:**
-  - `MONGODB_ATLAS_PUBLIC_KEY` (Atlas public API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
-  - `MONGODB_ATLAS_PRIVATE_KEY` (Atlas private API key, [see MongoDB docs](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for API key creation guidance)
-  - `TF_VAR_mongo_atlas_client_id` (Atlas client ID, to generate this value, please follow the [Mongo Atlas Metrics guide](./MongoAtlasMetrics_deployment_steps.md))
-  - `TF_VAR_mongo_atlas_client_secret` (Atlas client secret, to generate this value, please follow the [Mongo Atlas Metrics guide](./MongoAtlasMetrics_deployment_steps.md))
-  - `TF_VAR_org_id` (Atlas org ID)
-- **Variables:**
-  - `ARM_CLIENT_ID` (Managed identity's Client Id)
-  - `ARM_SUBSCRIPTION_ID` (The subscription Id where the resources will be created)
-  - `ARM_TENANT_ID` (The tenant Id of the subscription where the resources will be created)
-  - `TF_VAR_project_name` (Atlas project name)
-  - `TF_VAR_cluster_name` (Atlas cluster name)
-  - `TF_VAR_resource_group_name_tfstate` (Name of Resource Group for TF state)
-  - `TF_VAR_storage_account_name_tfstate` (Name of Storage Account for TF state)
-  - `TF_VAR_container_name_tfstate` (Name of Container for TF state)
-  - `TF_VAR_key_name_tfstate` (Name of devops' TF state key)
-  - `FUNCTION_APP_NAME` (Name of the Function App created in Infrastructure step for the Mongo Atlas Metrics)
-  - `INFRA_RG_NAME` (Name of the Resource Group created for the Infrastructure resources)
+**Environment Configuration**
 
-  #### The variable below is optional, just in case you want to deploy the test db connection app
+In the `dev` environment, set the following secrets and variables:
 
-  - `TF_VAR_key_name_infra_tfstate` (Name of Key for Infra's TF state)
-  - `APP_RG_NAME` (Name of the Resource Group created for the Application step resources)
-  - `APP_WEBAPPS` (Comma-separated string value of Web App names. Use a single name for single-region deployments, and multiple names for multi-region deployments. This value can only be set after running the Application step, where the Web Apps are deployed.)
+---
 
+#### **Secrets**
+
+| Name                          | Description                                                                                                             |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| `MONGODB_ATLAS_PUBLIC_API_KEY`    | MongoDB Atlas public API key. See [MongoDB API Access documentation](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for instructions. |
+| `MONGODB_ATLAS_PRIVATE_API_KEY`   | MongoDB Atlas private API key. See [MongoDB API Access documentation](https://www.mongodb.com/docs/atlas/configure-api-access-org/) for instructions. |
+| `TF_VAR_mongo_atlas_client_id`    | MongoDB Atlas client ID. [See deployment guide](./MongoAtlasMetrics_deployment_steps.md) to generate this.           |
+| `TF_VAR_mongo_atlas_client_secret`| MongoDB Atlas client secret. [See deployment guide](./MongoAtlasMetrics_deployment_steps.md) to generate this.        |
+| `TF_VAR_org_id`                   | MongoDB Atlas organization ID.                                                                                      |
+
+---
+
+#### **Variables**
+
+| Name                                  | Description                                                                               | Sample Value                                         |
+|----------------------------------------|-------------------------------------------------------------------------------------------|------------------------------------------------------|
+| `ARM_CLIENT_ID`                        | Managed identity client ID.                                                               | `00000000-0000-0000-0000-000000000000`              |
+| `ARM_SUBSCRIPTION_ID`                  | Azure subscription ID where resources will be created.                                    | `00000000-0000-0000-0000-000000000000`              |
+| `ARM_TENANT_ID`                        | Azure tenant ID for your subscription.                                                    | `00000000-0000-0000-0000-000000000000`              |
+| `TF_VAR_project_name`                  | MongoDB Atlas project name.                                                               | `atlas-dev-proj`                                     |
+| `TF_VAR_cluster_name`                  | MongoDB Atlas cluster name.                                                               | `atlas-dev-cluster`                                  |
+| `TF_VAR_resource_group_name_tfstate`   | Name of the Azure Resource Group storing the Terraform state.                             | `rg-devops`                                          |
+| `TF_VAR_storage_account_name_tfstate`  | Name of the Azure Storage Account for Terraform state.                                    | `sttfdev147`                                         |
+| `TF_VAR_container_name_tfstate`        | Name of the Storage Account container for Terraform state.                                | `tfstate`                                            |
+| `TF_VAR_key_name_tfstate`              | Key (filename) of the Terraform state for the DevOps deployment.                          | `devops.tfstate`                                     |
+| `INFRA_RG_NAME`                        | Name of the Resource Group created for infrastructure resources.                          | `rg-infra`                                           |
+| `TF_VAR_open_access`                   | Boolean flag to control open (true) or restricted (false) Key Vault network access.       | `true` or `false`                                    |
+
+---
+
+#### *Optional Variables (for Test DB Connection App)*
+
+*These variables are only required if deploying the test database connection application.  
+They must be configured **after running the Application pipeline step**, when app(s) are created and their names known.*
+
+| Name                          | Description                                                           | Sample Value                       |
+|-------------------------------|-----------------------------------------------------------------------|------------------------------------|
+| `TF_VAR_key_name_infra_tfstate` | Key (filename) of the Terraform state for infrastructure resources. | `01-base-infra.tfstate`                      |
+| `APP_RG_NAME`                   | Resource Group name for the application step resources.             | `rg-app`                   |
+| `APP_WEBAPPS`                   | Comma-separated list of Web App names. Single for single-region; multiple for multi-region. | `app-application` (single) or `app-application-eastus,app-application-eastus2` (multi) |
+| `FUNCTION_APP_NAME`             | Name of the Azure Function App created in the infra step (step 1). | `func-infrasingregion`         |
 - **Important:**
   - You will find the org id in the organization's settings as shown below:
   ![org_id](../images/org_id.png)

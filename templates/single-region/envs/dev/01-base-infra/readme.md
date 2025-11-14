@@ -26,6 +26,10 @@ Before running this step, you need to:
    - Verify the `vnet_address_space`, `private_subnet_prefixes`, `observability_function_app_subnet_prefixes`, and `observability_private_endpoint_subnet_prefixes` in `locals.tf` align with your network design.
    - Ensure the subnet CIDR doesn't conflict with existing subnets.
 
+**Configure Key Vault Access**:
+   - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Key Vault and its secrets can be created successfully.
+   - After resources and secrets have been created, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
+
 > **Note:** For information on How to Deploy manually, please follow the steps in [Deploy with manual steps](../../../../../docs/wiki/Deploy-with-manual-steps.md) guide.
 
 ## What This Step Deploys
@@ -34,15 +38,33 @@ This configuration creates:
 
 - **MongoDB Atlas Cluster**: Single-region cluster with backup enabled by default, but it can be turned off if specified.
 - **Virtual Network**: Dedicated VNet for the cluster.
-- **Private Subnet**: Subnet for private connectivity.
+- **Private Subnets**: 
+  - Private subnet for MongoDB Atlas connectivity
+  - Function app subnet for observability resources
+  - Private endpoint subnet for secure connections
 - **Private Endpoint**: Secure connection to MongoDB Atlas.
-- **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources, including Application Insights, Storage Account, Service Plan, Function App, Private DNS Zones, and Private Endpoints. After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API, collect metrics, and send them to Application Insights for monitoring and analysis.
+- **Azure Key Vault**: Secure storage for MongoDB Atlas client secret with:
+  - Network ACL restrictions (configurable via `open_access` variable)
+  - Private endpoint for secure access
+  - Access policy for Function App managed identity
+- **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources, including:
+  - Log Analytics Workspace
+  - Application Insights (with Private Link Scope)
+  - Storage Account
+  - Service Plan
+  - Function App (with system-assigned managed identity)
+  - Private DNS Zones
+  - Private Endpoints
+  - After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
 
 ## Validate
 
 - Atlas cluster is deployed and healthy in the configured region.
 - Private Endpoint is approved/connected.
 - DNS resolution from inside the VNet returns a private IP for the Atlas hostname.
+- Key Vault is deployed and accessible from the Function App subnet.
+- Key Vault contains the MongoDB Atlas client secret.
+- Function App has Key Vault access policy configured with "Get" permission.
 
 ## Post-Deployment Steps
 
@@ -72,10 +94,17 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 ### Networking Settings
 
 - **vnet_address_space**: Address space for the virtual network, default is `10.0.0.0/26`.
-- **private_subnet_prefixes**: Prefixes for private subnets, default is `10.0.0.0/29`.
-- **observability_function_app_subnet_prefixes**: Prefixes fot Observability Function App, default is `10.0.0.8/29`.
+- **private_subnet_prefixes**: Prefixes for private subnets (MongoDB connectivity), default is `10.0.0.0/29`.
+- **observability_function_app_subnet_prefixes**: Prefixes for Observability Function App subnet, default is `10.0.0.8/29`.
 - **observability_private_endpoint_subnet_prefixes**: Prefixes for Observability private endpoint subnet, default is `10.0.0.16/28`.
 > The default addresses set here are placeholders for the template. To run this template, you must provide your own IP addresses.
+
+### Security Settings
+
+- **open_access**: Controls Key Vault network access. Default is `false`.
+  - On the **first run** (resource creation and initial secret injection), set to `true` to allow public access and enable the creation and population of Key Vault secrets.
+  - On the **second and all successive runs**, set to `false` (recommended for production) so that Key Vault restricts access to the specified subnet (Function App subnet).
+- **mongo_atlas_client_secret_expiration**: Expiration date for the MongoDB Atlas client secret stored in Key Vault, default is `2026-01-01T00:00:00Z`.
 
 ## Backup Configuration
 

@@ -1,29 +1,40 @@
-# Welcome to the MongoDB Atlas Azure Landing Zone Accelerator wiki
+# Welcome to the MongoDB Atlas Azure Landing Zone Accelerator Wiki
 
-This wiki documents how to automate the deployment of MongoDB Atlas on Azure using the Landing Zone Accelerator pattern. The solution uses Terraform for infrastructure automation and provides both single-region and multi-region deployment patterns.
+This wiki provides comprehensive guidance for automating the deployment of MongoDB Atlas on Azure using the Landing Zone Accelerator pattern.  
+The solution uses Terraform for infrastructure automation and supports both single-region and multi-region deployment scenarios.
 
-## Navigation
+---
 
-### Getting Started
+## Architecture
 
-- [Introduction](./Introduction.md) - Overview and introduction to the solution
-- [Prerequisites](./Prerequisites.md) - Requirements and setup prerequisites
-- [Setup Environment](./Setup-environment.md) - Environment configuration guide
+**Single-Region Deployment**
 
-### Deployment Options
+![Single Region Architecture](../images/architecture-single-region.png)
 
-- [Deploy with Pipeline](./Deploy-with-pipeline.md) - Automated deployment using CI/CD pipeline
-- [Deploy with Manual Steps](./Deploy-with-manual-steps.md) - Manual deployment steps
+**Multi-Region Deployment**
 
-### Modules
+![Multi Region Architecture](../images/architecture-multi-region.png)
 
-- [Modules](./Modules.md) - Available Terraform modules and their usage
+---
 
-### Testing and Validation
+## Quick Navigation
 
-- [Test DB Connection Steps](./Test_DB_connection_steps.md) - Database connection testing procedures
+### 1. Getting Started
+- [Prerequisites](./Prerequisites.md): What you need before you begin
+- [Setup Environment](./Setup-environment.md): How to configure your environment
 
-### Reference and Support
+### 2. Deployment Methods
+- [Deploy with Pipeline](./Deploy-with-pipeline.md): Automated deployment using CI/CD workflows
+- [Deploy with Manual Steps](./Deploy-with-manual-steps.md): Step-by-step manual deployment guide
 
-- [Frequently Asked Questions](./FAQ.md) - Common questions and answers
-- [Known Issues](./KnownIssues.md) - Known limitations and workarounds
+### 3. Validation & Testing
+- [Test DB Connection Steps](./Test_DB_connection_steps.md): Validate cluster connectivity
+
+### 4. Help & Reference
+- [Frequently Asked Questions](./FAQ.md): Common questions and answers
+- [Known Issues](./KnownIssues.md): Current limitations and workarounds
+
+### 5. Additional Documentation
+- [Modules](./Modules.md): Terraform modules provided and usage instructions
+
+---

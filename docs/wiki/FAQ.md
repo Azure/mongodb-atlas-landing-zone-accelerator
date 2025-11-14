@@ -26,7 +26,7 @@ No, deploying this infrastructure provisions paid resources such as MongoDB Atla
 
 ### How do I deploy the infrastructure?
 
-You can deploy the infrastructure using the provided GitHub Actions workflows or manually with Terraform. For step-by-step deployment guidance, see the [deployment guide](./Introduction.md#deployment-flow).
+You can deploy the infrastructure using the provided GitHub Actions workflows or manually with Terraform. For step-by-step deployment guidance, see the [deployment guide](./Home#Deployment-Methods).
 
 ### What are the prerequisites for deployment?
 

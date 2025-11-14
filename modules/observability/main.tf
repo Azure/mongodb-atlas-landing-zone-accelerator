@@ -1,16 +1,20 @@
-# -------------------------
-# Application Insights
-# -------------------------
+resource "azurerm_log_analytics_workspace" "law" {
+  name                       = var.log_analytics_workspace_name
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  sku                        = var.log_analytics_workspace_sku
+  retention_in_days          = var.log_analytics_workspace_retention_days
+  internet_ingestion_enabled = false
+}
 resource "azurerm_application_insights" "observability_appinsights" {
-  name                = var.app_insights_name
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  application_type    = "web"
+  name                       = var.app_insights_name
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  workspace_id               = azurerm_log_analytics_workspace.law.id
+  application_type           = "web"
+  internet_ingestion_enabled = false
 }
 
-# -------------------------
-# Azure Storage for Function App
-# -------------------------
 resource "azurerm_storage_account" "observability_function_storage" {
   name                            = var.storage_account_name
   resource_group_name             = var.resource_group_name
@@ -28,13 +32,10 @@ resource "azurerm_storage_account" "observability_function_storage" {
 
 resource "azurerm_storage_container" "observability_function_container" {
   name                  = "observability-function"
-  storage_account_name  = azurerm_storage_account.observability_function_storage.name
   container_access_type = "private"
+  storage_account_id    = azurerm_storage_account.observability_function_storage.id
 }
 
-# -------------------------
-# Service Plan for Function App
-# -------------------------
 resource "azurerm_service_plan" "observability_function_plan" {
   name                = var.service_plan_name
   location            = var.location
@@ -43,9 +44,6 @@ resource "azurerm_service_plan" "observability_function_plan" {
   os_type             = "Linux"
 }
 
-# -------------------------
-# Flex Consumption Linux Function App
-# -------------------------
 resource "azurerm_function_app_flex_consumption" "observability_function" {
   name                = var.function_app_name
   resource_group_name = var.resource_group_name
@@ -65,10 +63,9 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   app_settings = {
     "APPLICATIONINSIGHTS_CONNECTION_STRING" = azurerm_application_insights.observability_appinsights.connection_string
     "MONGODB_CLIENT_ID"                     = var.mongo_atlas_client_id
-    "MONGODB_CLIENT_SECRET"                 = var.mongo_atlas_client_secret
+    "MONGODB_CLIENT_SECRET"                 = format("@Microsoft.KeyVault(SecretUri=%s)", var.mongo_atlas_client_secret_kv_uri)
     "MONGODB_GROUP_NAME"                    = var.mongo_group_name
     "AzureWebJobsStorage"                   = azurerm_storage_account.observability_function_storage.primary_connection_string
-    "FUNCTIONS_EXTENSION_VERSION"           = "~4"
     "FUNCTION_FREQUENCY_CRON"               = var.function_frequency_cron
     "MONGODB_INCLUDED_METRICS"              = var.mongodb_included_metrics
     "MONGODB_EXCLUDED_METRICS"              = var.mongodb_excluded_metrics
@@ -82,10 +79,6 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
 
   site_config {}
 }
-
-# -------------------------
-# Azure Monitor Private Link Scope
-# -------------------------
 resource "azurerm_monitor_private_link_scope" "pls" {
   name                  = var.private_link_scope_name
   resource_group_name   = var.resource_group_name
@@ -100,9 +93,6 @@ resource "azurerm_monitor_private_link_scoped_service" "appinsights_assoc" {
   linked_resource_id  = azurerm_application_insights.observability_appinsights.id
 }
 
-# -------------------------
-# Private DNS Zones
-# -------------------------
 resource "azurerm_private_dns_zone" "oms" {
   name                = "privatelink.oms.opinsights.azure.com"
   resource_group_name = var.resource_group_name
@@ -163,9 +153,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "agentsvc_link" {
   virtual_network_id    = var.vnet_id
 }
 
-# -------------------------
-# Private Endpoint
-# -------------------------
 resource "azurerm_private_endpoint" "appinsights_pe" {
   name                          = var.pe_name
   location                      = var.location
@@ -191,5 +178,9 @@ resource "azurerm_private_endpoint" "appinsights_pe" {
     ]
   }
 
-  tags = {}
+  depends_on = [
+    azurerm_log_analytics_workspace.law,
+    azurerm_application_insights.observability_appinsights,
+    azurerm_monitor_private_link_scope.pls
+  ]
 }

@@ -10,80 +10,98 @@
 > - [Defender for Servers](https://learn.microsoft.com/en-us/azure/defender-for-cloud/defender-for-servers-overview)
 > - [Microsoft Entra Global Secure Access (GSA)](https://learn.microsoft.com/en-us/entra/global-secure-access/overview-what-is-global-secure-access)
 
-## Overview
+---
+
+## Get Started: Deployment Steps
+
+### 1. Decide How to Deploy
+
+- **Automated (Recommended):**
+  Deploy through GitHub Actions CI/CD workflows for full automation. Follow the [Pipeline Deployment Guide](docs/wiki/Deploy-with-pipeline.md).
+
+- **Manual:**
+  Run Terraform and supporting scripts directly. See [Manual Deployment Steps](docs/wiki/Deploy-with-manual-steps.md).
+
+### 2. Prepare Your Environment
+
+- Review and configure [environment prerequisites](docs/wiki/Prerequisites.md).
+- Configure required environment variables: [Setup Environment Guide](docs/wiki/Setup-environment.md).
+
+### 3. Review Architecture and Modules
+
+- Understand available [Terraform modules and their usage](./docs/wiki/Modules.md).
+- Reference example architectures:
+  - **Single Region:**
+    ![Single Region Architecture](docs/images/architecture-single-region.png)
+  - **Multi Region:**
+    ![Multi Region Architecture](docs/images/architecture-multi-region.png)
+
+### 4. Choose Your Deployment Pattern
+
+- **Single-region** and **multi-region** patterns are supported across both automated and manual options.
+
+---
+
+## Solution Overview
 
 This repository provides a modular Terraform solution for deploying a secure MongoDB Atlas environment on Azure, featuring:
 
 - Private networking and secure connectivity
 - DevOps automation for remote state and identity
 - End-to-end cluster setup for MongoDB Atlas
-- Observability and monitoring infrastructure, including Azure Application Insights and a Metrics Function App for centralized metrics collection
-- Automation for provisioning infrastructure, configuring Atlas clusters, and deploying a test application for connectivity validation
-
-It supports both **single-region** and **multi-region** deployments.
-
-The infrastructure can be deployed using the provided GitHub Actions workflows for CI/CD automation (see the [Pipeline Deployment Guide](docs/wiki/Deploy-with-pipeline.md)) or manually with Terraform (see the [Manual Deployment Steps](docs/wiki/Deploy-with-manual-steps.md)). The recommended method is deployment via workflows to ensure full automation, while manual deployment through the CLI remains available as an alternative.
-
-> For step-by-step deployment guidance, see the [deployment guide](docs/wiki/Introduction.md).
+- Observability and monitoring with Azure Application Insights and a Metrics Function App
+- Automated infrastructure provisioning, Atlas cluster configuration, and a test application for validation
 
 ---
 
 ## Module Overview
 
-For module-specific details, refer to [Modules.md](./docs/wiki/Modules.md):
+For details on specific modules, refer to [Modules.md](./docs/wiki/Modules.md):
 
-- [Application](./modules/application/readme.md): App Service Plan, Web App, and VNet integration.
-- [DevOps](./modules/devops/readme.md): Remote state, identity, and automation.
-- [MongoDB Atlas Config Single Region](./modules/atlas_config_single_region/readme.md): Atlas project, cluster, and PrivateLink.
-- [MongoDB Atlas Config Multi Region](./modules/atlas_config_multi_region/readme.md): Atlas project, cluster, and PrivateLink.
-- [MongoDB Marketplace](./modules/mongodb_marketplace/readme.md): Atlas org deployment via Azure Marketplace.
-- [Network](./modules/network/readme.md): VNet, subnets, NAT, NSG, and private endpoints.
-- [VNet Peering](./modules/vnet_peering/readme.md): Virtual network peering for multi-region connectivity.
-- [Observability](./modules/observability/readme.md): Application Insights, and supporting resources for monitoring and metrics collection.
+- [Application](./modules/application/readme.md): App Service Plan, Web App, VNet integration
+- [DevOps](./modules/devops/readme.md): Remote state, identity, automation
+- [MongoDB Atlas Config Single Region](./modules/atlas_config_single_region/readme.md): Atlas project, cluster, PrivateLink (single region)
+- [MongoDB Atlas Config Multi Region](./modules/atlas_config_multi_region/readme.md): Atlas project, cluster, PrivateLink (multi-region)
+- [MongoDB Marketplace](./modules/mongodb_marketplace/readme.md): Atlas org deployment via Azure Marketplace
+- [Network](./modules/network/readme.md): VNet, subnets, NSG, private endpoints
+- [VNet Peering](./modules/vnet_peering/readme.md): Network peering for multi-region
+- [Observability](./modules/observability/readme.md): Application Insights, metrics, monitoring
 
 ---
 
 ## Disclaimer
 
-> **Warning:** Deploying this infrastructure is **NOT free**.  
+> **Warning:** Deploying this infrastructure is **NOT free**.
 > It provisions paid resources such as a dedicated MongoDB Atlas cluster (minimum M10 tier for Private Endpoints), Azure networking components, and other Azure services. Review pricing details in the [MongoDB Atlas Private Endpoint documentation](https://www.mongodb.com/docs/atlas/security-private-endpoint/) before running `terraform apply`.
 
-This code is provided for demonstration purposes and should not be used in production without thorough testing.  
+This code is provided for demonstration purposes and should not be used in production without thorough testing.
 You are responsible for validating the configuration and ensuring it meets your environment's requirements.
 
 For questions or to discuss suitability for your use case, please create an issue in this repository.
 
-By using this repository, you agree to assume all risks and use it at your own discretion. Microsoft and the authors are not liable for damages or losses from its use.  
+By using this repository, you agree to assume all risks and use it at your own discretion. Microsoft and the authors are not liable for damages or losses from its use.
 See the [Support section](./SUPPORT.md) for details.
 
 ---
 
-## Wiki
+## Documentation & Wiki
 
-Please see the content in the [wiki](docs/wiki/Home.md) for more detailed information about the repo and various other pieces of documentation.
+Start exploring more detailed documentation in the [Wiki Home](docs/wiki/Home.md), including:
 
----
-
-## Known Issues
-
-See the [Known Issues page](docs/wiki/KnownIssues.md) for the latest list of limitations, workarounds, and open problems.
-
----
-
-## Frequently Asked Questions
-
-See the [FAQ](docs/wiki/FAQ.md) for common questions and answers.
+- [Known Issues](docs/wiki/KnownIssues.md)
+- [Frequently Asked Questions](docs/wiki/FAQ.md)
+- [Contribution Guidelines](docs/wiki/Contributing.md)
 
 ---
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  
+This project welcomes contributions and suggestions.
 Before contributing, you will need to sign the [Microsoft Contributor License Agreement (CLA)](https://cla.opensource.microsoft.com).
 
 Pull requests will be checked automatically by the CLA bot to determine if a CLA is required. Follow its instructions as needed.
 
-We follow the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).  
+We follow the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or email [opencode@microsoft.com](mailto:opencode@microsoft.com).
 
 > Contribution details can be found in the [wiki](docs/wiki/Contributing.md).
@@ -92,6 +110,6 @@ For more information, see the [Code of Conduct FAQ](https://opensource.microsoft
 
 ## Trademarks
 
-This project may contain trademarks or logos for projects, products, or services.  
-Authorized use of Microsoft trademarks or logos is subject to and must follow the [Microsoft Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).  
+This project may contain trademarks or logos for projects, products, or services.
+Authorized use of Microsoft trademarks or logos is subject to and must follow the [Microsoft Trademark & Brand Guidelines](https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks/usage/general).
 Any use of third-party trademarks or logos is subject to those third parties’ policies.
