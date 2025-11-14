@@ -56,7 +56,7 @@ Before deploying, determine the architecture that best fits your requirements an
 
 To avoid unexpected charges, **always clean up resources when you're done**.
 
-See [CLEANUP.md](docs/wiki/Cleanup.md) for the full step-by-step cleanup procedure, including how to destroy Azure and MongoDB Atlas resources in the correct order.
+See [Cleanup.md](docs/wiki/Cleanup.md) for the full step-by-step cleanup procedure, including how to destroy Azure and MongoDB Atlas resources in the correct order.
 
 
 ---
