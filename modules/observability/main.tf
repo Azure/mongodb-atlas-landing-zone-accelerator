@@ -53,7 +53,7 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   storage_container_type     = "blobContainer"
   storage_container_endpoint = "${azurerm_storage_account.observability_function_storage.primary_blob_endpoint}${azurerm_storage_container.observability_function_container.name}"
 
-  # Unable to use Managed Identity due to a provider bug (https://github.com/hashicorp/terraform-provider-azurerm/issues/30732)
+  # Unable to use Managed Identity due to a Terraform provider bug (https://github.com/hashicorp/terraform-provider-azurerm/issues/30732). In production, implement proper authentication using Entra ID and not pre-shared keys. Disable key-based access on the Storage account.
   storage_authentication_type = "StorageAccountConnectionString"
   storage_access_key          = azurerm_storage_account.observability_function_storage.primary_access_key
 
