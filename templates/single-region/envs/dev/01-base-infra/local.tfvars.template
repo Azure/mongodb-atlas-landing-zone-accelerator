@@ -17,5 +17,5 @@ container_name_tfstate       = ""
 key_name_tfstate             = ""
 
 # Keyvault configuration 
-# Set to true to allow public access to Key Vault (Only on first run/resource creation)
+# Set to true to allow public access to Key Vault and the Azure Function (Only on first run/resource creation)
 open_access = false

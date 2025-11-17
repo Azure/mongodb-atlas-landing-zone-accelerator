@@ -110,7 +110,7 @@ In the `dev` environment, set the following secrets and variables:
 | `TF_VAR_container_name_tfstate`        | Name of the Storage Account container for Terraform state.                                | `tfstate`                                            |
 | `TF_VAR_key_name_tfstate`              | Key (filename) of the Terraform state for the DevOps deployment.                          | `devops.tfstate`                                     |
 | `INFRA_RG_NAME`                        | Name of the Resource Group created for infrastructure resources.                          | `rg-infra`                                           |
-| `TF_VAR_open_access`                   | Boolean flag to control open (true) or restricted (false) Key Vault network access.       | `true` or `false`                                    |
+| `TF_VAR_open_access`                   | Boolean flag to control open (true) or restricted (false) Key Vault and Azure Function network access.       | `true` or `false`                                    |
 
 ---
 

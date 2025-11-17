@@ -65,6 +65,6 @@ variable "mongodb_excluded_metrics" {
 
 variable "open_access" {
   type        = bool
-  description = "If true, Key Vault network ACL will allow all (for bootstrap/dev); if false, will restrict traffic."
+  description = "If true, Key Vault network ACL and Azure Function will allow all traffic (for bootstrap/dev); if false, will restrict traffic."
   default     = false
 }

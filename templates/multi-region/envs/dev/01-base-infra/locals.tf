@@ -22,45 +22,45 @@ locals {
   # Disclaimer: The `node_count` must be either 3, 5, or 7. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/cluster.html?utm_source=chatgpt.com#electable_nodes-1
 
   region_definitions = {
-    eastus = {
-      atlas_region                                   = "US_EAST"
-      azure_region                                   = "eastus"
+    zoneA = {
+      atlas_region                                   = "US_EAST_2"
+      azure_region                                   = "eastus2"
       priority                                       = 7
-      address_space                                  = ["10.0.0.0/26"]
+      address_space                                  = ["10.0.0.0/25"]
       private_subnet_prefixes                        = ["10.0.0.0/29"]
       observability_function_app_subnet_prefixes     = ["10.0.0.8/29"]
       observability_private_endpoint_subnet_prefixes = ["10.0.0.16/28"]
       observability_storage_account_subnet_prefixes  = ["10.0.0.32/28"]
       keyvault_private_endpoint_subnet_prefixes      = ["10.0.0.48/28"]
-      private_subnet_name                            = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus"
-      observability_function_app_subnet_name         = "${module.naming.subnet.name_unique}-function-app-eastus"
-      observability_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-observability-private-endpoint-eastus"
-      keyvault_private_endpoint_subnet_name          = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus"
-      observability_storage_account_subnet_name      = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus"
+      private_subnet_name                            = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
+      observability_function_app_subnet_name         = "${module.naming.subnet.name_unique}-function-app-eastus2"
+      observability_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-observability-private-endpoint-eastus2"
+      keyvault_private_endpoint_subnet_name          = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus2"
+      observability_storage_account_subnet_name      = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus2"
       deploy_observability_subnets                   = true
       has_keyvault_private_endpoint                  = true
       has_observability_storage_account              = true
       node_count                                     = 2
     }
-    eastus2 = {
-      atlas_region                      = "US_EAST_2"
-      azure_region                      = "eastus2"
+    zoneB = {
+      atlas_region                      = "US_CENTRAL"
+      azure_region                      = "centralus"
       priority                          = 6
-      address_space                     = ["10.0.0.64/28"]
-      private_subnet_prefixes           = ["10.0.0.64/29"]
-      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
+      address_space                     = ["10.0.0.128/28"]
+      private_subnet_prefixes           = ["10.0.0.128/29"]
+      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-centralus"
       deploy_observability_subnets      = false
       has_keyvault_private_endpoint     = false
       has_observability_storage_account = false
       node_count                        = 2
     }
-    westus = {
-      atlas_region                      = "US_WEST"
-      azure_region                      = "westus"
+    zoneC = {
+      atlas_region                      = "CANADA_CENTRAL"
+      azure_region                      = "canadacentral"
       priority                          = 5
-      address_space                     = ["10.0.0.80/28"]
-      private_subnet_prefixes           = ["10.0.0.80/29"]
-      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-westus"
+      address_space                     = ["10.0.0.144/28"]
+      private_subnet_prefixes           = ["10.0.0.144/29"]
+      private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-canadacentral"
       deploy_observability_subnets      = false
       has_keyvault_private_endpoint     = false
       has_observability_storage_account = false
@@ -107,11 +107,9 @@ locals {
   pair_list  = flatten([for i, a in local.vnet_keys : [for j, b in local.vnet_keys : { key = "${a}|${b}", a = a, b = b } if i < j]])
   vnet_pairs = { for p in local.pair_list : p.key => { a = p.a, b = p.b } }
 
-  mongo_atlas_client_id     = var.mongo_atlas_client_id
-  mongo_atlas_client_secret = var.mongo_atlas_client_secret
-  # Keyvault
-  now                                  = timestamp()
-  mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
+  mongo_atlas_client_id                = var.mongo_atlas_client_id
+  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
 }

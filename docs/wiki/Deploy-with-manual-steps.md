@@ -94,8 +94,8 @@ These `local.tfvars` files are for manual deployments.
   - Set all required environment variables.
 - **Note:**  
   - **You must run this stage twice:**
-    1. First, run with `open_access=true` to allow Key Vault creation and injection of initial secrets.
-    2. After a successful apply and secret creation, run again with `open_access=false` to restrict Key Vault network access for security compliance.
+    1. First, run with `open_access=true` to allow Key Vault creation, injection of initial secrets and to deploy the Azure Function's code.
+    2. After a successful apply and secret creation, run again with `open_access=false` to restrict Key Vault and Azure Function network access for security compliance.
 
 - **Commands:**
   ```bash

@@ -4,7 +4,7 @@ locals {
 
   project_name = var.project_name
 
-  vnet_address_space = ["10.0.0.0/26"]
+  vnet_address_space = ["10.0.0.0/25"]
 
   private_subnet_prefixes                        = ["10.0.0.0/29"]
   observability_function_app_subnet_prefixes     = ["10.0.0.8/29"]
@@ -36,11 +36,9 @@ locals {
   reference_minute_of_hour = 45
   restore_window_days      = 4
 
-  mongo_atlas_client_id     = var.mongo_atlas_client_id
-  mongo_atlas_client_secret = var.mongo_atlas_client_secret
-  # Keyvault
-  now                                  = timestamp()
-  mongo_atlas_client_secret_expiration = timeadd(local.now, "8760h")
+  mongo_atlas_client_id                = var.mongo_atlas_client_id
+  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
+  mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
 }

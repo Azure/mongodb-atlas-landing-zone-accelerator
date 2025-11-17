@@ -19,29 +19,32 @@ Include this module in your Terraform configuration and provide all required var
 
 ```hcl
 module "observability" {
-  source                        = "./modules/observability"
-  app_insights_name             = "<your-app-insights-name>"
-  log_analytics_workspace_name  = "<your-law-name>"
-  location                      = "<azure-region>"
-  resource_group_name           = "<resource-group-name>"
-  storage_account_name          = "<storage-account-name>"
-  service_plan_name             = "<service-plan-name>"
-  function_app_name             = "<function-app-name>"
-  mongo_atlas_client_id         = "<atlas-client-id>"
-  mongo_atlas_client_secret     = "<atlas-client-secret>"
-  mongo_group_name              = "<atlas-group-name>"
-  function_subnet_id            = "<subnet-id>"
-  private_link_scope_name       = "<private-link-scope-name>"
-  appinsights_assoc_name        = "<appinsights-assoc-name>"
-  pe_name                       = "<private-endpoint-name>"
-  network_interface_name        = "<network-interface-name>"
-  private_service_connection_name = "<private-service-connection-name>"
-  vnet_id                       = "<vnet-id>"
-  vnet_name                     = "<vnet-name>"
-  private_endpoint_subnet_id    = "<private-endpoint-subnet-id>"
-  function_frequency_cron       = "<cron-expression>"
-  mongodb_included_metrics      = "<comma-separated-metrics>"
-  mongodb_excluded_metrics      = "<comma-separated-metrics>"
+  source                            = "./modules/observability"
+  app_insights_name                 = "<your-app-insights-name>"
+  log_analytics_workspace_name      = "<your-law-name>"
+  location                          = "<azure-region>"
+  resource_group_name               = "<resource-group-name>"
+  storage_account_name              = "<storage-account-name>"
+  service_plan_name                 = "<service-plan-name>"
+  function_app_name                 = "<function-app-name>"
+  mongo_atlas_client_id             = "<atlas-client-id>"
+  mongo_atlas_client_secret         = "<atlas-client-secret>"
+  mongo_group_name                  = "<atlas-group-name>"
+  function_subnet_id                = "<subnet-id>"
+  private_link_scope_name           = "<private-link-scope-name>"
+  appinsights_assoc_name            = "<appinsights-assoc-name>"
+  pe_name                           = "<private-endpoint-name>"
+  network_interface_name            = "<network-interface-name>"
+  private_service_connection_name   = "<private-service-connection-name>"
+  vnet_id                           = "<vnet-id>"
+  vnet_name                         = "<vnet-name>"
+  storage_account_pe_subnet_id      = "<subnet-id>"
+  ampls_pe_subnet_id                = "<subnet-id>"
+  mongo_atlas_client_secret_kv_uri  = "<secret-kv-uri>"
+  function_frequency_cron           = "<cron-expression>"
+  mongodb_included_metrics          = "<comma-separated-metrics>"
+  mongodb_excluded_metrics          = "<comma-separated-metrics>"
+  open_access                       = <true|false>
 }
 ```
 
@@ -68,10 +71,13 @@ module "observability" {
 | private_service_connection_name | Name for the Private Endpoint's Private Service Connection                  | string | yes      |
 | vnet_id                       | ID of the Virtual Network to link the Private DNS Zone                       | string | yes      |
 | vnet_name                     | Name of the Virtual Network                                                  | string | yes      |
-| private_endpoint_subnet_id    | ID of the subnet for the Private Endpoint                                    | string | yes      |
+| storage_account_pe_subnet_id  | ID of the subnet to connect the Storage account                                 | string | yes      |
+| mongo_atlas_client_secret_kv_uri | URI of Keyvault's secret                                 | string | yes      |
+| ampls_pe_subnet_id            | ID of the subnet to connect the AMPLS private endpoint                                 | string | yes      |
 | function_frequency_cron       | Cron expression for function frequency                                       | string | no      |
 | mongodb_included_metrics      | Comma-separated metrics to include for MongoDB monitoring                    | string | no       |
 | mongodb_excluded_metrics      | Comma-separated metrics to exclude for MongoDB monitoring                    | string | no       |
+| open_access      |  Azure Function's public network access enabled during bootstrap? true=Yes, false=No for SFI                    | bool | no       |
 
 ## Outputs
 
@@ -86,3 +92,19 @@ module "observability" {
 - Blob retention policy is set for 7 days.
 - All containers are private by default.
 - Function App uses system-assigned managed identity and runs in a secure subnet.
+
+## Network Access Configuration
+
+The module supports two network access modes via the `open_access` variable:
+
+### Restricted Access (Production - Recommended)
+When `open_access = false` (default):
+- `public_network_access_enabled` is set to **false**
+- Ideal for production environments following zero-trust principles
+
+### Open Access (Development/Testing)
+When `open_access = true`:
+- `public_network_access_enabled` is set to **true**
+- Public access is permitted, so users can deploy the Azure Functions code
+- Useful during initial setup or development
+- **Not recommended for production**

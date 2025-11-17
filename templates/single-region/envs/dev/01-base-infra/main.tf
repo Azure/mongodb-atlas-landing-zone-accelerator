@@ -88,13 +88,14 @@ module "kv" {
   key_vault_name                       = module.naming.key_vault.name_unique
   tenant_id                            = data.azurerm_client_config.current.tenant_id
   mongo_atlas_client_secret            = local.mongo_atlas_client_secret
-  virtual_network_subnet_ids           = [module.network.subnet_ids["observability_function_app"]]
   admin_object_id                      = data.azurerm_client_config.current.object_id
   open_access                          = var.open_access
   mongo_atlas_client_secret_expiration = local.mongo_atlas_client_secret_expiration
   private_endpoint_subnet_id           = module.network.subnet_ids["keyvault_private_endpoint"]
   private_endpoint_name                = "${module.naming.private_endpoint.name_unique}kv"
   private_service_connection_name      = "${module.naming.private_service_connection.name_unique}kv"
+  vnet_name                            = module.network.vnet_name
+  vnet_id                              = module.network.vnet_id
   purge_protection_enabled             = local.purge_protection_enabled
   soft_delete_retention_days           = local.soft_delete_retention_days
 }
@@ -111,18 +112,24 @@ module "observability" {
   mongo_atlas_client_id            = local.mongo_atlas_client_id
   mongo_group_name                 = local.project_name
   function_subnet_id               = module.network.subnet_ids["observability_function_app"]
-  private_endpoint_subnet_id       = module.network.subnet_ids["observability_private_endpoint"]
   private_link_scope_name          = "private_link_scope_sr"
   appinsights_assoc_name           = "private_link_appi_association"
-  pe_name                          = "${module.naming.private_endpoint.name_unique}-appinsights"
+  pe_name                          = module.naming.private_endpoint.name_unique
   network_interface_name           = module.naming.network_interface.name_unique
-  private_service_connection_name  = "${module.naming.private_service_connection.name}-appinsights"
+  private_service_connection_name  = module.naming.private_service_connection.name_unique
   vnet_id                          = module.network.vnet_id
   vnet_name                        = module.network.vnet_name
+  ampls_pe_subnet_id               = module.network.subnet_ids["observability_private_endpoint"]
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
+  storage_account_pe_subnet_id     = module.network.subnet_ids["observability_storage_account"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
+  open_access                      = var.open_access
+
+  depends_on = [
+    module.network
+  ]
 }
 
 data "azurerm_resource_group" "infrastructure_rg" {
@@ -133,5 +140,5 @@ resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {
   key_vault_id       = module.kv.key_vault_id
   tenant_id          = data.azurerm_client_config.current.tenant_id
   object_id          = module.observability.function_app_identity_principal_id
-  secret_permissions = ["Get"]
+  secret_permissions = ["Get", "List"]
 }

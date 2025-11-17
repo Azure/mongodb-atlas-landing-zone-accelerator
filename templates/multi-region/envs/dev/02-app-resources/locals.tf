@@ -6,21 +6,24 @@ locals {
   // Note: Ensure that these addresses do not conflict with existing subnet addresses and that
   // they are part of the same step 1 VNet.
   region_addresses = {
-    eastus = {
-      app_subnet = ["10.0.0.32/29"]
+    zoneA = {
+      location   = "eastus2"
+      app_subnet = ["10.0.0.64/29"]
     }
-    eastus2 = {
-      app_subnet = ["10.0.0.72/29"]
+    zoneB = {
+      location   = "centralus"
+      app_subnet = ["10.0.0.136/29"]
     }
-    westus = {
-      app_subnet = ["10.0.0.88/29"]
+    zoneC = {
+      location   = "canadacentral"
+      app_subnet = ["10.0.0.152/29"]
     }
   }
 
   app_information_by_region = {
     for k, v in local.region_addresses :
     k => {
-      location              = k
+      location              = v.location
       app_service_plan_name = "${module.naming.app_service_plan.name_unique}-${k}"
       app_service_plan_sku  = "B1" # Minimum SKU for VNet integration is B1
       app_web_app_name      = "${module.naming.app_service.name_unique}-${k}"

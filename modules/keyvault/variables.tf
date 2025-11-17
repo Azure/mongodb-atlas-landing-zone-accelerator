@@ -24,12 +24,6 @@ variable "open_access" {
   default     = false
 }
 
-variable "virtual_network_subnet_ids" {
-  description = "List of subnet IDs permitted access to the Key Vault"
-  type        = list(string)
-  default     = []
-}
-
 variable "admin_object_id" {
   description = "Object ID for the principal to set in Key Vault access policy"
   type        = string
@@ -61,6 +55,16 @@ variable "private_service_connection_name" {
   type        = string
 }
 
+variable "vnet_name" {
+  description = "Name of the Virtual Network for DNS link"
+  type        = string
+}
+
+variable "vnet_id" {
+  description = "ID of the Virtual Network for DNS link"
+  type        = string
+
+}
 variable "purge_protection_enabled" {
   description = "Whether purge protection is enabled for Key Vault. In production, this should be true."
   type        = bool

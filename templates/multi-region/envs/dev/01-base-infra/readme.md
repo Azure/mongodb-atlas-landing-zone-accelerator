@@ -36,7 +36,7 @@ This configuration creates:
 
 * **MongoDB Atlas Cluster**: Multi-region cluster with backup enabled by default, but it can be turned off if specified.
 * **Virtual Networks**: Dedicated VNets for each region.
-* **Private Subnets**: 
+* **Private Subnets**:
   - Private subnet for MongoDB Atlas connectivity in each region
   - Function app subnet for observability resources (eastus only)
   - Private endpoint subnet for secure connections (eastus only)
@@ -55,6 +55,8 @@ This configuration creates:
   - Private DNS Zones
   - Private Endpoints
   - After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
+  - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Azure Function code can be deployed successfully.
+  - After resources have been created and code has been deployed, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
 
 ## Validate
 
@@ -90,9 +92,12 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 
 ### Security Settings
 
-- **open_access**: Controls Key Vault network access. Default is `false`.
-  - On the **first run** (resource creation and initial secret injection), set to `true` to allow public access and enable the creation and population of Key Vault secrets.
-  - On the **second and all successive runs**, set to `false` (recommended for production) so that Key Vault restricts access to the specified subnet (Function App subnet).
+- **open_access**: Controls Key Vault and Azure Function network access. Default is `false`.
+  - On the **first run** (resource creation and initial secret injection), set to `true` to allow public access and enable the creation and population of Key Vault secrets and Azure Function's code deployment.
+  - On the **second and all successive runs**, set to `false` (recommended for production) so that Key Vault and the Azure Function restricts access to the specified subnet (Function App subnet).
+
+    In production, you should never expose this Key Vault publicly, run your deployment from a build agent that has private networking access to your workload's resources.
+
 - **mongo_atlas_client_secret_expiration**: Expiration date for the MongoDB Atlas client secret stored in Key Vault, default is `2026-01-01T00:00:00Z`.
 
 ### Region Definitions
