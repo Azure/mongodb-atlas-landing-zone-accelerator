@@ -67,7 +67,7 @@ module "network" {
       service_connection_name = "${module.naming.private_service_connection.name}-mongodb"
       service_resource_id     = module.mongodb_atlas_config.atlas_pe_service_id
       is_manual_connection    = local.manual_connection
-      request_message         = "Mongo DB Atlas Private Endpoint connection from ${local.project_name}."
+      request_message         = "Please approve my MongoDB PE."
       tags                    = local.tags
     }
   }
