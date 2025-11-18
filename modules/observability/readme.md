@@ -1,16 +1,14 @@
 # Observability Module
 
-This Terraform module provisions observability infrastructure for monitoring MongoDB Atlas metrics in Azure. It creates all necessary resources to host a scheduled metrics collection Function App.
+This Terraform module provisions observability infrastructure for monitoring MongoDB Atlas metrics in Azure. It creates all necessary resources to host a scheduled metrics collection Function App that sends telemetry to Application Insights (provided by the `monitoring` module).
 
 ## Resources Created
 
-- **Azure Application Insights**: Centralized monitoring and diagnostics for metrics collected from MongoDB Atlas.
 - **Azure Storage Account & Container**: Secure storage for Function App code and logs (TLS 1.2 enforced, no public nested items, blob retention policy).
 - **Azure Service Plan**: Linux Flex Consumption plan for hosting the Function App.
 - **Azure Function App (Flex Consumption)**: Hosts the metrics collection function (code must be deployed separately).
-- **Private DNS Zones & Links**: Ensures secure, private connectivity for monitoring and storage endpoints.
-- **Azure Monitor Private Link Scope & Scoped Service**: Enables private connectivity for Application Insights.
-- **Private Endpoint**: Secure private access to Application Insights.
+- **Private DNS Zones & Links**: Ensures secure, private connectivity for storage endpoints (blob, queue, table, file).
+- **4 Private Endpoints**: Secure private access to Storage Account subresources (blob, queue, table, file).
 
 ## Usage
 
@@ -20,8 +18,8 @@ Include this module in your Terraform configuration and provide all required var
 ```hcl
 module "observability" {
   source                            = "./modules/observability"
-  app_insights_name                 = "<your-app-insights-name>"
-  log_analytics_workspace_name      = "<your-law-name>"
+  log_analytics_workspace_id      = "<log-analytics-workspace-id>"
+  app_insights_connection_string    = "<app-insights-connection-string>"
   location                          = "<azure-region>"
   resource_group_name               = "<resource-group-name>"
   storage_account_name              = "<storage-account-name>"
@@ -38,8 +36,8 @@ module "observability" {
   private_service_connection_name   = "<private-service-connection-name>"
   vnet_id                           = "<vnet-id>"
   vnet_name                         = "<vnet-name>"
+  private_endpoint_subnet_id        = "<private-endpoint-subnet-id>"
   storage_account_pe_subnet_id      = "<subnet-id>"
-  ampls_pe_subnet_id                = "<subnet-id>"
   mongo_atlas_client_secret_kv_uri  = "<secret-kv-uri>"
   function_frequency_cron           = "<cron-expression>"
   mongodb_included_metrics          = "<comma-separated-metrics>"
@@ -53,8 +51,8 @@ module "observability" {
 
 | Name                          | Description                                                                 | Type   | Required |
 |-------------------------------|-----------------------------------------------------------------------------|--------|----------|
-| app_insights_name             | Name for Application Insights                                                | string | yes      |
-| log_analytics_workspace_name  | Name for Log Analytics workspace                                             | string | yes      |
+| log_analytics_workspace_id      | ID of the central Log Analytics workspace for diagnostic settings           | string | yes      |
+| app_insights_connection_string  | Connection string for Application Insights (from monitoring module)         | string | yes      |
 | location                      | Azure region for resources                                                   | string | yes      |
 | resource_group_name           | Resource group name                                                          | string | yes      |
 | storage_account_name          | Name for the storage account                                                 | string | yes      |
@@ -71,9 +69,9 @@ module "observability" {
 | private_service_connection_name | Name for the Private Endpoint's Private Service Connection                  | string | yes      |
 | vnet_id                       | ID of the Virtual Network to link the Private DNS Zone                       | string | yes      |
 | vnet_name                     | Name of the Virtual Network                                                  | string | yes      |
+| private_endpoint_subnet_id    | ID of the subnet for the Private Endpoint                                    | string | yes      |
 | storage_account_pe_subnet_id  | ID of the subnet to connect the Storage account                                 | string | yes      |
 | mongo_atlas_client_secret_kv_uri | URI of Keyvault's secret                                 | string | yes      |
-| ampls_pe_subnet_id            | ID of the subnet to connect the AMPLS private endpoint                                 | string | yes      |
 | function_frequency_cron       | Cron expression for function frequency                                       | string | no      |
 | mongodb_included_metrics      | Comma-separated metrics to include for MongoDB monitoring                    | string | no       |
 | mongodb_excluded_metrics      | Comma-separated metrics to exclude for MongoDB monitoring                    | string | no       |
@@ -81,10 +79,13 @@ module "observability" {
 
 ## Outputs
 
-| Name                                         | Description                                         |
-|----------------------------------------------|-----------------------------------------------------|
-| observability_appinsights_instrumentation_key| Instrumentation Key for Application Insights         |
-| observability_function_default_hostname      | Default hostname for the observability function app  |
+| Name                                    | Description                                                     |
+|-----------------------------------------|-----------------------------------------------------------------|
+| observability_function_default_hostname | Default hostname for the observability function app             |
+| function_app_identity_principal_id      | Principal ID of the function app's managed identity             |
+| storage_account_id                      | ID of the storage account backing the observability function    |
+| function_app_id                         | ID of the observability function app                            |
+| app_service_plan_id                     | ID of the service plan hosting the observability function app   |
 
 ## Security & Best Practices
 

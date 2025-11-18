@@ -23,31 +23,31 @@ locals {
 
   region_definitions = {
     zoneA = {
-      atlas_region                                   = "US_EAST_2"
-      azure_region                                   = "eastus2"
-      priority                                       = 7
-      address_space                                  = ["10.0.0.0/25"]
-      private_subnet_prefixes                        = ["10.0.0.0/29"]
-      observability_function_app_subnet_prefixes     = ["10.0.0.8/29"]
-      observability_private_endpoint_subnet_prefixes = ["10.0.0.16/28"]
-      observability_storage_account_subnet_prefixes  = ["10.0.0.32/28"]
-      keyvault_private_endpoint_subnet_prefixes      = ["10.0.0.48/28"]
-      private_subnet_name                            = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
-      observability_function_app_subnet_name         = "${module.naming.subnet.name_unique}-function-app-eastus2"
-      observability_private_endpoint_subnet_name     = "${module.naming.subnet.name_unique}-observability-private-endpoint-eastus2"
-      keyvault_private_endpoint_subnet_name          = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus2"
-      observability_storage_account_subnet_name      = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus2"
-      deploy_observability_subnets                   = true
-      has_keyvault_private_endpoint                  = true
-      has_observability_storage_account              = true
-      node_count                                     = 2
+      atlas_region                                  = "US_EAST_2"
+      azure_region                                  = "eastus2"
+      priority                                      = 7
+      address_space                                 = ["10.0.0.0/24"]
+      private_subnet_prefixes                       = ["10.0.0.0/28"]
+      observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
+      monitoring_ampls_subnet_prefixes              = ["10.0.0.32/27"]
+      observability_storage_account_subnet_prefixes = ["10.0.0.64/27"]
+      keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.96/27"]
+      private_subnet_name                           = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-eastus2"
+      observability_function_app_subnet_name        = "${module.naming.subnet.name_unique}-function-app-eastus2"
+      monitoring_ampls_subnet_name                  = "${module.naming.subnet.name_unique}-monitoring-ampls-eastus2"
+      keyvault_private_endpoint_subnet_name         = "${module.naming.subnet.name_unique}-kv-private-endpoint-eastus2"
+      observability_storage_account_subnet_name     = "${module.naming.subnet.name_unique}-observability-sa-private-endpoint-eastus2"
+      deploy_observability_subnets                  = true
+      has_keyvault_private_endpoint                 = true
+      has_observability_storage_account             = true
+      node_count                                    = 2
     }
     zoneB = {
       atlas_region                      = "US_CENTRAL"
       azure_region                      = "centralus"
       priority                          = 6
-      address_space                     = ["10.0.0.128/28"]
-      private_subnet_prefixes           = ["10.0.0.128/29"]
+      address_space                     = ["10.0.1.0/27"]
+      private_subnet_prefixes           = ["10.0.1.0/28"]
       private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-centralus"
       deploy_observability_subnets      = false
       has_keyvault_private_endpoint     = false
@@ -58,8 +58,8 @@ locals {
       atlas_region                      = "CANADA_CENTRAL"
       azure_region                      = "canadacentral"
       priority                          = 5
-      address_space                     = ["10.0.0.144/28"]
-      private_subnet_prefixes           = ["10.0.0.144/29"]
+      address_space                     = ["10.0.1.32/27"]
+      private_subnet_prefixes           = ["10.0.1.32/28"]
       private_subnet_name               = "${module.naming.subnet.name_unique}-mongodb-private-endpoint-canadacentral"
       deploy_observability_subnets      = false
       has_keyvault_private_endpoint     = false
@@ -84,22 +84,22 @@ locals {
   # For Azure resources
   regions = {
     for k, v in local.region_definitions : k => {
-      location                                       = v.azure_region
-      address_space                                  = v.address_space
-      private_subnet_prefixes                        = v.private_subnet_prefixes
-      private_subnet_name                            = v.private_subnet_name
-      manual_connection                              = true
-      deploy_observability_subnets                   = v.deploy_observability_subnets
-      has_keyvault_private_endpoint                  = v.has_keyvault_private_endpoint
-      has_observability_storage_account              = v.has_observability_storage_account
-      observability_function_app_subnet_prefixes     = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
-      observability_private_endpoint_subnet_prefixes = v.deploy_observability_subnets ? v.observability_private_endpoint_subnet_prefixes : null
-      observability_function_app_subnet_name         = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
-      observability_private_endpoint_subnet_name     = v.deploy_observability_subnets ? v.observability_private_endpoint_subnet_name : null
-      keyvault_private_endpoint_subnet_prefixes      = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_prefixes : null
-      keyvault_private_endpoint_subnet_name          = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_name : null
-      observability_storage_account_subnet_prefixes  = v.has_observability_storage_account ? v.observability_storage_account_subnet_prefixes : null
-      observability_storage_account_subnet_name      = v.has_observability_storage_account ? v.observability_storage_account_subnet_name : null
+      location                                      = v.azure_region
+      address_space                                 = v.address_space
+      private_subnet_prefixes                       = v.private_subnet_prefixes
+      private_subnet_name                           = v.private_subnet_name
+      manual_connection                             = true
+      deploy_observability_subnets                  = v.deploy_observability_subnets
+      has_keyvault_private_endpoint                 = v.has_keyvault_private_endpoint
+      has_observability_storage_account             = v.has_observability_storage_account
+      observability_function_app_subnet_prefixes    = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
+      monitoring_ampls_subnet_prefixes              = v.deploy_observability_subnets ? v.monitoring_ampls_subnet_prefixes : null
+      observability_function_app_subnet_name        = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
+      monitoring_ampls_subnet_name                  = v.deploy_observability_subnets ? v.monitoring_ampls_subnet_name : null
+      keyvault_private_endpoint_subnet_prefixes     = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_prefixes : null
+      keyvault_private_endpoint_subnet_name         = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_name : null
+      observability_storage_account_subnet_prefixes = v.has_observability_storage_account ? v.observability_storage_account_subnet_prefixes : null
+      observability_storage_account_subnet_name     = v.has_observability_storage_account ? v.observability_storage_account_subnet_name : null
     }
   }
 
@@ -112,4 +112,9 @@ locals {
   mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
+
+  # Log Analytics Workspace configuration
+  log_analytics_workspace_sku                        = "PerGB2018"
+  log_analytics_workspace_retention_in_days          = 30
+  log_analytics_workspace_internet_ingestion_enabled = false
 }

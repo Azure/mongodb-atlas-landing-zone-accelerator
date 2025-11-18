@@ -9,7 +9,10 @@ variable "location" {
   type        = string
 }
 
-variable "network_interface_name" {
+variable "log_analytics_workspace_id" {
+  description = "ID of the central Log Analytics workspace for diagnostic settings"
+}
+  variable "network_interface_name" {
   description = "General name for the Network Interface."
   type        = string
 }
@@ -24,37 +27,10 @@ variable "private_service_connection_name" {
   type        = string
 }
 
-# Log Analytics related variables
-variable "log_analytics_workspace_sku" {
-  description = "SKU for Log Analytics Workspace"
+variable "app_insights_connection_string" {
+  description = "Connection string for Application Insights (from monitoring module)"
   type        = string
-  default     = "PerGB2018"
-}
-
-variable "log_analytics_workspace_name" {
-  description = "Name for Log Analytics Workspace"
-  type        = string
-}
-
-variable "log_analytics_workspace_retention_days" {
-  description = "Retention period in days for Log Analytics Workspace"
-  type        = number
-  default     = 30
-}
-
-variable "app_insights_name" {
-  description = "Name for Application Insights instance"
-  type        = string
-}
-
-variable "private_link_scope_name" {
-  description = "Name for the Private Link Scope."
-  type        = string
-}
-
-variable "appinsights_assoc_name" {
-  description = "Name for the App Insights Scoped Resource Association."
-  type        = string
+  sensitive   = true
 }
 
 # Function App related variables
@@ -77,16 +53,6 @@ variable "storage_account_name" {
 
 variable "vnet_id" {
   description = "ID of the Virtual Network to link the Private DNS Zone."
-  type        = string
-}
-
-variable "vnet_name" {
-  description = "Name of the Virtual Network."
-  type        = string
-}
-
-variable "ampls_pe_subnet_id" {
-  description = "ID of the subnet for the AMPLS Private Endpoint."
   type        = string
 }
 

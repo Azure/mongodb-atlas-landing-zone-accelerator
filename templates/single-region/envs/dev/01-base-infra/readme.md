@@ -38,7 +38,7 @@ This configuration creates:
 
 - **MongoDB Atlas Cluster**: Single-region cluster with backup enabled by default, but it can be turned off if specified.
 - **Virtual Network**: Dedicated VNet for the cluster.
-- **Private Subnets**:
+- **Private Subnets**: 
   - Private subnet for MongoDB Atlas connectivity
   - Function app subnet for observability resources
   - Private endpoint subnet for secure connections
@@ -58,6 +58,7 @@ This configuration creates:
   - After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
   - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Azure Function code can be deployed successfully.
   - After resources have been created and code has been deployed, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
+- **Diagnostic Settings**: Configures Azure Monitor diagnostic settings for all deployed Azure resources (Storage Accounts, Function Apps, App Service Plans, Key Vaults, Virtual Networks, and Application Insights), sending logs and metrics to the centralized Log Analytics workspace for comprehensive monitoring and troubleshooting.
 
 ## Validate
 

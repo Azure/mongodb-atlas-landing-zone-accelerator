@@ -8,15 +8,15 @@ locals {
   region_addresses = {
     zoneA = {
       location   = "eastus2"
-      app_subnet = ["10.0.0.64/29"]
+      app_subnet = ["10.0.0.128/28"]
     }
     zoneB = {
       location   = "centralus"
-      app_subnet = ["10.0.0.136/29"]
+      app_subnet = ["10.0.1.16/28"]
     }
     zoneC = {
       location   = "canadacentral"
-      app_subnet = ["10.0.0.152/29"]
+      app_subnet = ["10.0.1.48/28"]
     }
   }
 

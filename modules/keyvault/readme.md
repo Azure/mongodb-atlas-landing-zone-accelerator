@@ -46,16 +46,16 @@ module "keyvault" {
 
 This module supports configuration of both **purge protection** and **soft delete retention** to balance security with developer flexibility. These are critical for how you manage the lifecycle and recovery of Key Vault resources:
 
-- `purge_protection_enabled` (`bool`):
+- `purge_protection_enabled` (`bool`):  
   - **Production:** Should be set to `true` (default) for security compliance. When enabled, a deleted Key Vault cannot be purged (permanently deleted) until after the retention period ends.
   - **Development/Testing:** You may set this to `false` to allow immediate, permanent deletion and recreation of Key Vaults with the same name. Be aware this reduces safety against accidental or malicious deletion.
 
-- `soft_delete_retention_days` (`int`, 7–90):
+- `soft_delete_retention_days` (`int`, 7–90):  
   - **Production:** Use a longer retention (e.g. 30–90 days) to allow time for recovery from accidental deletions.
   - **Development/Testing:** Shorter values (minimum 7) can improve developer agility and environment re-use.
   - **Important:** Cannot be below 7 or above 90.
 
-> ⚠️ **Implications**
+> ⚠️ **Implications**  
 When purge protection is enabled, you **cannot fully delete or immediately re-create a Key Vault with the same name for the full retention period** (default 7 days). Take this into account for automation, CI/CD, ephemeral environments, and cleanup jobs.
 
 **Example for Development/Testing:**

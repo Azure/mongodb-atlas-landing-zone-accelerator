@@ -31,6 +31,13 @@ resource "azurerm_subnet" "subnets" {
     }
   }
   service_endpoints = try(each.value.service_endpoints, [])
+
+  # Azure automatically manages delegation actions; ignore provider drift
+  lifecycle {
+    ignore_changes = [
+      delegation[0].service_delegation[0].actions,
+    ]
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "nsg_association" {
