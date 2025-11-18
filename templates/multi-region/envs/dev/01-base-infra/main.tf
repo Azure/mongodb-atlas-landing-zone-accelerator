@@ -180,6 +180,7 @@ module "observability" {
   storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["observability_storage_account"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
+  maximum_instance_count           = local.maximum_instance_count
 
   depends_on = [
     module.network,

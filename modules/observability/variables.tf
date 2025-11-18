@@ -12,7 +12,7 @@ variable "location" {
 variable "log_analytics_workspace_id" {
   description = "ID of the central Log Analytics workspace for diagnostic settings"
 }
-  variable "network_interface_name" {
+variable "network_interface_name" {
   description = "General name for the Network Interface."
   type        = string
 }
@@ -99,6 +99,12 @@ variable "mongo_group_name" {
 variable "mongo_atlas_client_secret_kv_uri" {
   description = "Key Vault Secret URI for Mongo Atlas client secret"
   type        = string
+}
+
+variable "maximum_instance_count" {
+  description = "Maximum number of instances the function app can scale out to. Minimum is 40, maximum is 1000."
+  type        = number
+  default     = 40
 }
 
 variable "open_access" {

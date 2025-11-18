@@ -1,4 +1,5 @@
 locals {
+  # General Configuration
   location    = "eastus2"
   environment = "dev"
 
@@ -44,6 +45,10 @@ locals {
   mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
+
+  # Observability Configuration
+  # For Flex Consumption plan the minimum instance count is 40: https://learn.microsoft.com/en-us/azure/azure-functions/event-driven-scaling?tabs=azure-cli#flex-consumption-plan
+  maximum_instance_count = 40
 
   # Log Analytics Workspace configuration
   log_analytics_workspace_sku                        = "PerGB2018"

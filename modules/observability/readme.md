@@ -43,6 +43,7 @@ module "observability" {
   mongodb_included_metrics          = "<comma-separated-metrics>"
   mongodb_excluded_metrics          = "<comma-separated-metrics>"
   open_access                       = <true|false>
+  maximum_instance_count            = "<maximum-instance-number>"
 }
 ```
 
@@ -76,6 +77,7 @@ module "observability" {
 | mongodb_included_metrics      | Comma-separated metrics to include for MongoDB monitoring                    | string | no       |
 | mongodb_excluded_metrics      | Comma-separated metrics to exclude for MongoDB monitoring                    | string | no       |
 | open_access      |  Azure Function's public network access enabled during bootstrap? true=Yes, false=No for SFI                    | bool | no       |
+| maximum_instance_count           | Maximum instances for Flex Consumption Function App (Min: 40, Max: 1000)    | number | no       | 40     |
 
 ## Outputs
 
@@ -93,6 +95,12 @@ module "observability" {
 - Blob retention policy is set for 7 days.
 - All containers are private by default.
 - Function App uses system-assigned managed identity and runs in a secure subnet.
+- MongoDB Atlas client secret is securely stored in Key Vault and referenced via URI.
+- Function App uses Flex Consumption plan with configurable maximum instance count:
+  - Default: 40 instances
+  - Minimum: 40 instances
+  - Maximum: 1000 instances
+  - Adjust based on your monitoring workload requirements
 
 ## Network Access Configuration
 

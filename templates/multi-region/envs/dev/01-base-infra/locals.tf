@@ -1,4 +1,5 @@
 locals {
+  # General Configuration
   environment = "dev"
 
   project_name = var.project_name
@@ -18,6 +19,7 @@ locals {
 
   naming_suffix_base = "inframulregion"
 
+  # Network Configuration
   # Disclaimer: Ensure that the `instance_size` is consistent across all regions specified in `region_configs`. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/advanced_cluster#electable_specs-1
   # Disclaimer: The `node_count` must be either 3, 5, or 7. Refer to the official documentation for more details: https://registry.terraform.io/providers/mongodb/mongodbatlas/latest/docs/resources/cluster.html?utm_source=chatgpt.com#electable_nodes-1
 
@@ -112,6 +114,10 @@ locals {
   mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
+
+  # Observability Configuration
+  # For Flex Consumption plan the minimum instance count is 40: https://learn.microsoft.com/en-us/azure/azure-functions/event-driven-scaling?tabs=azure-cli#flex-consumption-plan
+  maximum_instance_count = 40
 
   # Log Analytics Workspace configuration
   log_analytics_workspace_sku                        = "PerGB2018"
