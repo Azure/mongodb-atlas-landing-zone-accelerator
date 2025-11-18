@@ -45,9 +45,8 @@
 ## [Monitoring Diagnostics Module](../../modules/monitoring_diagnostics/readme.md)
 
 - Configures Azure Monitor diagnostic settings for all infrastructure resources.
-- Connects Function Apps, Storage Accounts, Key Vaults, App Service Plans, Virtual Networks, Application Insights, and Storage sub-services to the centralized Log Analytics workspace.
-- Automatically discovers and enables all available log and metric categories for comprehensive observability.
-- Ensures consistent diagnostic coverage across the entire solution with predictable naming conventions.
+- Connects Function Apps, Storage Accounts, Key Vaults, and App Service Plans to the centralized Log Analytics workspace.
+- Automatically discovers and enables all available log categories for comprehensive observability. You'll want to tune this to only capture the data useful for your production workload.
 
 ## [Observability Module](../../modules/observability/readme.md)
 

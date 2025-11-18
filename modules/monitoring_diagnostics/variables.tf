@@ -14,20 +14,8 @@ variable "diagnostic_setting_name_prefix" {
   default     = null
 }
 
-variable "diagnostic_storage_account_ids" {
-  description = "Map of friendly keys to Storage Account resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
 variable "diagnostic_function_app_ids" {
   description = "Map of friendly keys to Function App resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_app_service_plan_ids" {
-  description = "Map of friendly keys to App Service Plan resource IDs requiring diagnostics."
   type        = map(string)
   default     = {}
 }
@@ -72,4 +60,10 @@ variable "diagnostic_storage_file_service_ids" {
   description = "Map of friendly keys to Storage Account File Service resource IDs requiring diagnostics."
   type        = map(string)
   default     = {}
+}
+
+variable "workspace_ids_by_location" {
+  description = "Map of Azure location to Log Analytics Workspace ID for regional routing. If provided, enables regional LAW routing for resources."
+  type        = map(string)
+  default     = null
 }

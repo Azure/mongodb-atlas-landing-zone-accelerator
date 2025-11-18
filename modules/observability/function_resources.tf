@@ -82,18 +82,6 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
       app_settings["AzureWebJobsStorage"],
     ]
   }
-
-  depends_on = [
-    azurerm_storage_account.observability_function_storage,
-    azurerm_private_endpoint.storage_blob,
-    azurerm_private_endpoint.storage_queue,
-    azurerm_private_endpoint.storage_table,
-    azurerm_private_endpoint.storage_file,
-    azurerm_private_dns_zone_virtual_network_link.linktovnet_blob,
-    azurerm_private_dns_zone_virtual_network_link.linktovnet_queue,
-    azurerm_private_dns_zone_virtual_network_link.linktovnet_table,
-    azurerm_private_dns_zone_virtual_network_link.linktovnet_file
-  ]
 }
 
 resource "azurerm_role_assignment" "functionToStorage1" {

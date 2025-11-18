@@ -38,7 +38,7 @@ This configuration creates:
 
 - **MongoDB Atlas Cluster**: Single-region cluster with backup enabled by default, but it can be turned off if specified.
 - **Virtual Network**: Dedicated VNet for the cluster.
-- **Private Subnets**:
+- **Private Subnets**: 
   - Private subnet for MongoDB Atlas connectivity
   - Function app subnet for observability resources
   - Private endpoint subnet for secure connections

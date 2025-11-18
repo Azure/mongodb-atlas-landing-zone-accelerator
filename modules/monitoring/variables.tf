@@ -40,7 +40,7 @@ variable "tags" {
 variable "internet_query_enabled" {
   description = "Should the workspace allow queries over the public internet?"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "app_insights_name" {
@@ -81,4 +81,23 @@ variable "network_interface_name" {
 variable "private_service_connection_name" {
   description = "Base name for the Private Service Connection"
   type        = string
+}
+
+variable "create_private_dns_zones" {
+  description = "Whether to create the private DNS zones. Set to true for the first region only in multi-region deployments."
+  type        = bool
+  default     = true
+}
+
+variable "private_dns_zone_ids" {
+  description = "Optional existing private DNS zone IDs to use instead of creating new ones. Map with keys: oms, ods, monitor, agentsvc. Required if create_private_dns_zones is false."
+  type        = map(string)
+  default     = null
+}
+
+variable "enable_ampls_pe" {
+  description = "Whether to enable the Private Endpoint for the Azure Monitor Private Link Scope."
+  type        = bool
+  default     = false
+
 }

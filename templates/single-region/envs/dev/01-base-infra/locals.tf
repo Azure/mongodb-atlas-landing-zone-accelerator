@@ -4,16 +4,15 @@ locals {
 
   project_name = var.project_name
 
-  vnet_address_space = ["10.0.0.0/25"]
+  vnet_address_space = ["10.0.0.0/24"]
 
   # Subnet CIDR blocks
   # Layout: 10.0.0.0/25 provides 128 IPs (0-127)
-  private_subnet_prefixes                    = ["10.0.0.0/29"] # 0-7 (8 IPs)
-  observability_function_app_subnet_prefixes = ["10.0.0.8/29"] # 8-15 (8 IPs)
-  # Reserved: 10.0.0.16/27 (16-47) - Reserved for future use
-  keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.48/28"] # 48-63 (16 IPs) - LOCKED, has active private endpoint
-  monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"] # 64-95 (32 IPs) - /27 requires 32-address boundary
-  observability_storage_account_subnet_prefixes = ["10.0.0.96/28"] # 96-111 (16 IPs)
+  private_subnet_prefixes                       = ["10.0.0.0/28"]
+  observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
+  keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.32/27"]
+  monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"]
+  observability_storage_account_subnet_prefixes = ["10.0.0.96/27"]
 
   # Subnet names
   private_subnet_name                       = "${module.naming.subnet.name_unique}-mongodb-private-endpoint"

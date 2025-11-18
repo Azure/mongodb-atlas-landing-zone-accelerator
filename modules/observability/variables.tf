@@ -9,7 +9,10 @@ variable "location" {
   type        = string
 }
 
-variable "network_interface_name" {
+variable "log_analytics_workspace_id" {
+  description = "ID of the central Log Analytics workspace for diagnostic settings"
+}
+  variable "network_interface_name" {
   description = "General name for the Network Interface."
   type        = string
 }
@@ -21,17 +24,6 @@ variable "pe_name" {
 
 variable "private_service_connection_name" {
   description = "General name for the Private Service Connections."
-  type        = string
-}
-
-# Log Analytics related variables
-variable "log_analytics_workspace_sku" {
-  description = "SKU for Log Analytics Workspace"
-  type        = string
-  default     = "PerGB2018"
-}
-variable "log_analytics_workspace_id" {
-  description = "ID of the central Log Analytics workspace for diagnostic settings"
   type        = string
 }
 
@@ -39,21 +31,6 @@ variable "app_insights_connection_string" {
   description = "Connection string for Application Insights (from monitoring module)"
   type        = string
   sensitive   = true
-}
-
-variable "network_interface_name" {
-  description = "General name for the Network Interface."
-  type        = string
-}
-
-variable "pe_name" {
-  description = "General name for the Private Endpoint."
-  type        = string
-}
-
-variable "private_service_connection_name" {
-  description = "General name for the Private Service Connections."
-  type        = string
 }
 
 # Function App related variables
@@ -76,11 +53,6 @@ variable "storage_account_name" {
 
 variable "vnet_id" {
   description = "ID of the Virtual Network to link the Private DNS Zone."
-  type        = string
-}
-
-variable "vnet_name" {
-  description = "Name of the Virtual Network."
   type        = string
 }
 

@@ -36,8 +36,8 @@ module "observability" {
   private_service_connection_name   = "<private-service-connection-name>"
   vnet_id                           = "<vnet-id>"
   vnet_name                         = "<vnet-name>"
+  private_endpoint_subnet_id        = "<private-endpoint-subnet-id>"
   storage_account_pe_subnet_id      = "<subnet-id>"
-  ampls_pe_subnet_id                = "<subnet-id>"
   mongo_atlas_client_secret_kv_uri  = "<secret-kv-uri>"
   function_frequency_cron           = "<cron-expression>"
   mongodb_included_metrics          = "<comma-separated-metrics>"
@@ -69,9 +69,9 @@ module "observability" {
 | private_service_connection_name | Name for the Private Endpoint's Private Service Connection                  | string | yes      |
 | vnet_id                       | ID of the Virtual Network to link the Private DNS Zone                       | string | yes      |
 | vnet_name                     | Name of the Virtual Network                                                  | string | yes      |
+| private_endpoint_subnet_id    | ID of the subnet for the Private Endpoint                                    | string | yes      |
 | storage_account_pe_subnet_id  | ID of the subnet to connect the Storage account                                 | string | yes      |
 | mongo_atlas_client_secret_kv_uri | URI of Keyvault's secret                                 | string | yes      |
-| ampls_pe_subnet_id            | ID of the subnet to connect the AMPLS private endpoint                                 | string | yes      |
 | function_frequency_cron       | Cron expression for function frequency                                       | string | no      |
 | mongodb_included_metrics      | Comma-separated metrics to include for MongoDB monitoring                    | string | no       |
 | mongodb_excluded_metrics      | Comma-separated metrics to exclude for MongoDB monitoring                    | string | no       |

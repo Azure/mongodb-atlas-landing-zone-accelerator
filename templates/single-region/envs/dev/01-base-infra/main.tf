@@ -67,7 +67,7 @@ module "network" {
       service_connection_name = "${module.naming.private_service_connection.name}-mongodb"
       service_resource_id     = module.mongodb_atlas_config.atlas_pe_service_id
       is_manual_connection    = local.manual_connection
-      request_message         = "Please approve my MongoDB PE."
+      request_message         = "Mongo DB Atlas Private Endpoint connection from ${local.project_name}."
       tags                    = local.tags
     }
   }
@@ -89,7 +89,7 @@ module "monitoring" {
   sku                             = local.log_analytics_workspace_sku
   retention_in_days               = local.log_analytics_workspace_retention_in_days
   internet_ingestion_enabled      = local.log_analytics_workspace_internet_ingestion_enabled
-  internet_query_enabled          = false
+  internet_query_enabled          = true
   app_insights_name               = module.naming.application_insights.name_unique
   private_link_scope_name         = "ampls-${module.naming.log_analytics_workspace.name_unique}"
   vnet_id                         = module.network.vnet_id
@@ -136,7 +136,6 @@ module "observability" {
   network_interface_name           = module.naming.network_interface.name_unique
   private_service_connection_name  = module.naming.private_service_connection.name_unique
   vnet_id                          = module.network.vnet_id
-  vnet_name                        = module.network.vnet_name
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
@@ -155,16 +154,8 @@ module "monitoring_diagnostics" {
 
   diagnostic_setting_name_prefix = module.naming.monitor_diagnostic_setting.name
 
-  diagnostic_storage_account_ids = {
-    observability = module.observability.storage_account_id
-  }
-
   diagnostic_function_app_ids = {
     observability = module.observability.function_app_id
-  }
-
-  diagnostic_app_service_plan_ids = {
-    observability = module.observability.app_service_plan_id
   }
 
   diagnostic_key_vault_ids = {

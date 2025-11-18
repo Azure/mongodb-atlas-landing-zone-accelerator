@@ -72,7 +72,7 @@ module "monitoring" {
   sku                        = "PerGB2018"
   retention_in_days          = 90
   internet_ingestion_enabled = false
-  internet_query_enabled     = false
+  internet_query_enabled     = true
   
   tags = {
     Environment = "Production"
