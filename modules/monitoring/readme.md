@@ -40,13 +40,13 @@ module "monitoring" {
   pe_name                         = "pep-monitoring"
   network_interface_name          = "nic-monitoring"
   private_service_connection_name = "psc-monitoring"
-  
+
   # Optional: customize workspace settings
   sku                        = "PerGB2018"
   retention_in_days          = 30
   internet_ingestion_enabled = false
   internet_query_enabled     = true
-  
+
   tags = {
     Environment = "dev"
     Project     = "myapp"
@@ -72,10 +72,10 @@ module "monitoring_zonea" {
   pe_name                         = "pep-monitoring-zonea"
   network_interface_name          = "nic-monitoring-zonea"
   private_service_connection_name = "psc-monitoring-zonea"
-  
+
   # Create DNS zones in first region
   create_private_dns_zones = true
-  
+
   tags = local.tags
 }
 
@@ -92,11 +92,11 @@ module "monitoring_zoneb" {
   enable_ampls_pe                 = false  # No AMPLS PE in this region
   create_app_insights             = false
   create_private_link_scope       = false
-  
+
   # Reuse DNS zones from first region
   create_private_dns_zones = false
   private_dns_zone_ids     = module.monitoring_zonea.private_dns_zone_ids
-  
+
   tags = local.tags
 }
 ```
@@ -176,22 +176,6 @@ module "monitoring_diagnostics" {
 | `app_insights_connection_string` | Connection String for Application Insights (sensitive, null if App Insights creation is disabled) |
 | `ampls_id` | ID of the Azure Monitor Private Link Scope (null if private link scope creation is disabled) |
 | `private_dns_zone_ids` | Private DNS zone IDs (oms, ods, monitor, agentsvc, blob) created by this module (null if zones were not created) |
-| `pe_name` | Name of the Private Endpoint | `string` | - | Yes |
-| `network_interface_name` | Name of the network interface for the private endpoint | `string` | - | Yes |
-| `private_service_connection_name` | Name of the private service connection | `string` | - | Yes |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| `workspace_id` | ID of the central Log Analytics workspace used for diagnostics |
-| `workspace_name` | Name of the central Log Analytics workspace used for diagnostics |
-| `workspace_location` | Location of the central Log Analytics workspace used for diagnostics |
-| `workspace_resource_group_name` | Resource group name where the Log Analytics workspace resides |
-| `app_insights_id` | ID of the Application Insights resource linked to the workspace (null if App Insights creation is disabled) |
-| `app_insights_instrumentation_key` | Instrumentation key for the Application Insights instance (sensitive, null if App Insights creation is disabled) |
-| `app_insights_connection_string` | Connection string for the Application Insights instance (sensitive, null if App Insights creation is disabled) |
-| `ampls_id` | ID of the Azure Monitor Private Link Scope (AMPLS) resource (null if private link scope creation is disabled) |
 
 ## Deployment Order
 
