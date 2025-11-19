@@ -1,6 +1,6 @@
 data "azurerm_resource_group" "regional_app_rgs" {
   for_each = data.terraform_remote_state.devops.outputs.resource_group_names.app
-  name = each.value.name
+  name     = each.value.name
 }
 
 # Application Modules

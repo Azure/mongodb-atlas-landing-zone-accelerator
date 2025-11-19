@@ -21,11 +21,6 @@ This Terraform configuration deploys the foundational infrastructure for MongoDB
 
 Before running this step, you need to:
 
-**Review Network Configuration**:
-
-   - Verify the `vnet_address_space`, `private_subnet_prefixes`, `observability_function_app_subnet_prefixes`, and `observability_private_endpoint_subnet_prefixes` in `locals.tf` align with your network design.
-   - Ensure the subnet CIDR doesn't conflict with existing subnets.
-
 **Configure Key Vault Access**:
    - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Key Vault and its secrets can be created successfully.
    - After resources and secrets have been created, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
@@ -41,24 +36,28 @@ This configuration creates:
 - **Private Subnets**: 
   - Private subnet for MongoDB Atlas connectivity
   - Function app subnet for observability resources
-  - Private endpoint subnet for secure connections
+  - Monitoring AMPLS subnet
+  - Key Vault private endpoint subnet
+  - Observability storage account subnet
 - **Private Endpoint**: Secure connection to MongoDB Atlas.
+- **Monitoring Resources**:
+  - Log Analytics Workspace
+  - Application Insights
+  - Azure Monitor Private Link Scope - AMPLS
+  - Private DNS Zones
 - **Azure Key Vault**: Secure storage for MongoDB Atlas client secret with:
   - Network ACL restrictions (configurable via `open_access` variable)
   - Private endpoint for secure access
   - Access policy for Function App managed identity
-- **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources, including:
-  - Log Analytics Workspace
-  - Application Insights (with Private Link Scope)
+- **Observability Resources**: Provisions infrastructure for centralized monitoring, including:
   - Storage Account
   - Service Plan
   - Function App (with system-assigned managed identity)
-  - Private DNS Zones
-  - Private Endpoints
-  - After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
-  - On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Azure Function code can be deployed successfully.
-  - After resources have been created and code has been deployed, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
-- **Diagnostic Settings**: Configures Azure Monitor diagnostic settings for all deployed Azure resources (Storage Accounts, Function Apps, App Service Plans, Key Vaults, Virtual Networks, and Application Insights), sending logs and metrics to the centralized Log Analytics workspace for comprehensive monitoring and troubleshooting.
+  - Private DNS Zones and Private Endpoints
+  - After resource creation, deploy the metrics collection function code to the Function App
+  - On the **first run** (resource creation), set `TF_VAR_open_access = true` to allow public access for code deployment
+  - After code deployment, rerun with `TF_VAR_open_access = false` to restrict access to the Function App subnet
+- **Diagnostic Settings**: Configures Azure Monitor diagnostic settings for all deployed Azure resources, sending logs and metrics to the centralized Log Analytics workspace.
 
 ## Validate
 
@@ -96,11 +95,13 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 
 ### Networking Settings
 
-- **vnet_address_space**: Address space for the virtual network, default is `10.0.0.0/26`.
-- **private_subnet_prefixes**: Prefixes for private subnets (MongoDB connectivity), default is `10.0.0.0/29`.
-- **observability_function_app_subnet_prefixes**: Prefixes for Observability Function App subnet, default is `10.0.0.8/29`.
-- **observability_private_endpoint_subnet_prefixes**: Prefixes for Observability private endpoint subnet, default is `10.0.0.16/28`.
-> The default addresses set here are placeholders for the template. To run this template, you must provide your own IP addresses.
+Networking configurations are derived from region definition in Step 0. The values in `locals.tf` include:
+- **vnet_address_space**: Address space for the virtual network
+- **private_subnet_prefixes**: Prefixes for private subnets (MongoDB connectivity)
+- **observability_function_app_subnet_prefixes**: Prefixes for Observability Function App subnet
+- **monitoring_ampls_subnet_prefixes**: Prefixes for monitoring AMPLS subnet
+- **keyvault_private_endpoint_subnet_prefixes**: Prefixes for Key Vault private endpoint subnet
+- **observability_storage_account_subnet_prefixes**: Prefixes for observability storage account subnet
 
 ### Security Settings
 
@@ -123,6 +124,7 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 ## Outputs
 
 - **vnet_name**: Name of the virtual network created.
+- **vnet_id**: ID of the virtual network created.
 - **cluster_id**: ID of the MongoDB Atlas cluster.
 - **project_name**: Name of the MongoDB Atlas project.
 - **mongodb_project_id**: ID of the MongoDB Atlas project.
@@ -130,3 +132,4 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 - **atlas_pe_service_id**: ID of the Atlas private endpoint service.
 - **atlas_privatelink_endpoint_id**: ID of the Atlas private link endpoint.
 - **function_app_default_hostname**: Function App default hostname.
+- **workspace_id**: ID of the Log Analytics Workspace.

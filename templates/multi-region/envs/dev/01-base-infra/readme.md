@@ -18,15 +18,9 @@ This Terraform configuration deploys the foundational infrastructure for MongoDB
 
 Before running this step, you need to:
 
-**Review Network Configuration**:
-
-* Verify the `region_definitions` in `locals.tf` align with your network design.
-* Ensure the subnet CIDR doesn't conflict with existing subnets.
-
 **Configure Key Vault Access**:
    * On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Key Vault and its secrets can be created successfully.
    * After resources and secrets have been created, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
-
 
 **Note:** For more information on How to Deploy manually, please follow [Deploy-with-manual-steps](../../../../../docs/wiki/Deploy-with-manual-steps.md).
 
@@ -35,20 +29,25 @@ Before running this step, you need to:
 This configuration creates:
 
 * **MongoDB Atlas Cluster**: Multi-region cluster with backup enabled by default, but it can be turned off if specified.
-* **Virtual Networks**: Dedicated VNets for each region.
+* **Virtual Networks**: Dedicated VNets for each configured region.
 * **Private Subnets**: 
   * Private subnet for MongoDB Atlas connectivity in each region
-  * Function app subnet for observability resources (eastus only)
-  * Private endpoint subnet for secure connections (eastus only)
+  * Function app subnet for observability resources (primary region only)
+  * Monitoring AMPLS subnet (primary region only)
+  * Key Vault private endpoint subnet (primary region only)
+  * Observability storage account subnet (primary region only)
 * **VNet Peerings**: Connections between VNets across all regions for seamless communication.
 * **Private Endpoints**: Secure connections to MongoDB Atlas in each region.
-* **Azure Key Vault**: Secure storage for MongoDB Atlas client secret with:
+* **Monitoring Resources** (per region):
+  * Log Analytics Workspace
+  * Application Insights (primary region only)
+  * Azure Monitor Private Link Scope - AMPLS (primary region only)
+  * Private DNS Zones (created in primary region, linked to all regions)
+* **Azure Key Vault** (primary region): Secure storage for MongoDB Atlas client secret with:
   * Network ACL restrictions (configurable via `open_access` variable)
   * Private endpoint for secure access
   * Access policy for Function App managed identity
-* **Observability Resources**: Provisions all infrastructure needed for centralized monitoring of MongoDB Atlas and Azure resources (deployed in eastus), including:
-  * Log Analytics Workspace
-  * Application Insights (with Private Link Scope)
+* **Observability Resources** (primary region): Provisions infrastructure for centralized monitoring, including:
   * Storage Account
   * Service Plan
   * Function App (with system-assigned managed identity)
@@ -103,18 +102,17 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 
 ### Region Definitions
 
-The `region_definitions` block in `locals.tf` contains configurations for multiple regions. These include:
+Region definitions are configured in Step 0 (`00-devops/locals.tf`) and passed to this step via remote state. Each region includes:
 
-* **atlas\_region**: Specifies the MongoDB Atlas region. Example values include `US_EAST`, `US_EAST_2`, and `US_WEST`.
-* **azure\_region**: Defines the corresponding Azure region. Example values include `eastus`, `eastus2`, and `westus`.
-* **priority**: Sets the priority of the region. Example values include `7`, `6`, and `5`.
-* **address\_space**: Specifies the address space for the virtual network. Example values include `10.0.0.0/26`, `10.0.0.64/28`, and `10.0.0.80/28`.
-* **private\_subnet\_prefixes**: Defines the prefixes for private subnets. Example values include `10.0.0.0/29`, `10.0.0.64/29`, and `10.0.0.80/29`.
-* **node\_count**: Indicates the number of nodes in the region. Example values include `2`, `2`, and `1`.
-* **observability\_function\_app\_subnet\_prefixes**: Defines the prefixes for private subnets for the Observability Function App, default is `10.0.0.8/29`.
-* **observability\_private\_endpoint\_subnet\_prefixes**: Defines the prefixes for private subnets for Observability private endpoint, default is `10.0.0.16/28`.
-
-> The default addresses set here are placeholders for the template. To run this template, you must provide your own IP addresses.
+* **atlas\_region**: MongoDB Atlas region identifier
+* **azure\_region**: Corresponding Azure region
+* **priority**: Region priority for Atlas cluster
+* **address\_space**: Virtual network address space
+* **private\_subnet\_prefixes**: Private subnet CIDR blocks
+* **node\_count**: Number of Atlas nodes in the region
+* **deploy\_observability\_subnets**: Whether to deploy observability-related subnets
+* **has\_keyvault\_private\_endpoint**: Whether to deploy Key Vault private endpoint subnet.
+* **has\_observability\_storage\_account**: Whether to deploy observability storage account subnet.
 
 ### Networking Settings
 
@@ -142,6 +140,6 @@ The backup feature is enabled by default (`backup_enabled = true`). It ensures t
 * **privatelink\_ids**: IDs of the private links created for MongoDB Atlas.
 * **atlas\_pe\_service\_ids**: IDs of the Atlas private endpoint services.
 * **atlas\_privatelink\_endpoint\_ids**: IDs of the Atlas private link endpoints.
-* **vnet\_names**: Names of the virtual networks created.
+* **vnets**: Name and resource group of the virtual networks created.
 * **regions\_values**: Values of the regions configured.
 * **function\_app\_default\_hostname**: Function App default hostname.

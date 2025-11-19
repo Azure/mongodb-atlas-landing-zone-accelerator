@@ -17,14 +17,7 @@ This Terraform configuration deploys Azure application resources including App S
 
 ### Required Manual Configuration
 
-Before running this step, you need to:
-
-**Review Network Configuration**:
-
-   * Verify the `address_prefixes` in `locals.tf` align with your network design.
-   * Ensure the subnet CIDR doesn't conflict with existing subnets.
-
-> **Note:** For information on How to Deploy manually, please follow the steps in [Deploy with manual steps](../../../../../docs/wiki/Deploy-with-manual-steps.md) guide.
+For information on How to Deploy manually, please follow [Deploy-with-manual-steps](../../../../../docs/wiki/Deploy-with-manual-steps.md).
 
 ## What This Step Deploys
 
@@ -60,16 +53,15 @@ Follow the detailed guide: [Database Connection Testing Guide](../../../../../do
 
 ### Application Settings
 
-* **resource\_group\_name**: Generated in step `00-devops`.
-* **app\_service\_plan\_name**: Generated dynamically using the Azure Naming Module.
-* **app\_service\_plan\_sku**: Default is set to `B1`.
-* **app\_web\_app\_name**: Generated dynamically using the Azure Naming Module.
-* **virtual\_network\_name**: Retrieved from the Step 1 remote state.
-* **subnet\_name**: Generated dynamically using the Azure Naming Module.
-* **address\_prefixes**: Default is set to `10.0.0.32/29`.
-
-> The default addresses set here are placeholders for the template. To run this template, you must provide your own IP addresses.
+* **resource\_group\_name**: Retrieved from Step 0 remote state
+* **location**: Retrieved from Step 0 region definition
+* **app\_service\_plan\_name**: Generated dynamically using the Azure Naming Module
+* **app\_service\_plan\_sku**: Default is set to `B1`
+* **app\_web\_app\_name**: Generated dynamically using the Azure Naming Module
+* **virtual\_network\_name**: Retrieved from Step 1 remote state
+* **subnet\_name**: Generated dynamically using the Azure Naming Module
+* **address\_prefixes**: Retrieved from Step 0 region definition (`app_subnet_prefixes`)
 
 ### Tags
 
-* **tags**: Metadata tags for resources, including `environment` and `location`. Default includes `environment` set to `dev` and `location` set to `eastus2`.
+* **tags**: Metadata tags for resources, including `environment`. Default includes `environment` set to `dev`.

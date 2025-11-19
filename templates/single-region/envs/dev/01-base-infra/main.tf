@@ -98,6 +98,10 @@ module "monitoring" {
   network_interface_name          = module.naming.network_interface.name_unique
   private_service_connection_name = module.naming.private_service_connection.name_unique
   tags                            = local.tags
+  enable_ampls_pe                 = true
+  create_private_link_scope       = true
+  create_app_insights             = true
+  create_private_dns_zones        = true
 }
 
 module "kv" {
@@ -189,9 +193,8 @@ data "azurerm_resource_group" "infrastructure_rg" {
   name = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure["unique"].name
 }
 
-resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {
-  key_vault_id       = module.kv.key_vault_id
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  object_id          = module.observability.function_app_identity_principal_id
-  secret_permissions = ["Get", "List"]
+resource "azurerm_role_assignment" "function_app_kv_rbac" {
+  scope                = module.kv.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.observability.function_app_identity_principal_id
 }

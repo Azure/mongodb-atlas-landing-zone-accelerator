@@ -26,7 +26,7 @@ output "vnets" {
   value = {
     for k, m in module.network :
     k => {
-      name = m.vnet_name
+      name                = m.vnet_name
       resource_group_name = data.azurerm_resource_group.infrastructure_rgs[k].name
     }
   }

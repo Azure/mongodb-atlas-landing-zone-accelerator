@@ -67,7 +67,7 @@ own issue tracker.
 
 ## Getting a "The requested region is currently out of capacity for the requested instance size" error when deploying new clusters
 
-**Issue**: When you are creating new clusters, you could get a `The requested region is currently out of capacity for the requested instance size` error. Also, the error could show something like: `The Cloud Provider you've chosen is out of capacity for the selected database deployment configuration`.
+**Issue**: When you are creating new clusters, you could get a `The requested region is currently out of capacity for the requested instance size` error depending on the availability of the selected regions. Also, the error could show something like: `The Cloud Provider you've chosen is out of capacity for the selected database deployment configuration`.
 
 **Details**:
 
@@ -77,4 +77,5 @@ Here is an example of the full error message in the MongoDB Atlas portal:
 
 **Workaround**:
 
+- If possible, select new regions (azure and atlas map) for the cluster deployment. These are defined in the `locals.tf` at the step `00-devops` in both templates.
 - According to the [MongoDB Community](https://www.mongodb.com/community/forums/t/the-requested-region-is-currently-out-of-capacity-for-the-requested-instance-size/235111/2), _the workaround is to wait a few minutes and try to deploy the cluster again. Cloud providers are aware of the capacity issue and are actively working on it_.

@@ -21,8 +21,8 @@ locals {
 
   region_definition = data.terraform_remote_state.devops.outputs.region_definition["unique"]
 
-  mongo_atlas_client_id     = var.mongo_atlas_client_id
-  mongo_atlas_client_secret = var.mongo_atlas_client_secret
+  mongo_atlas_client_id                = var.mongo_atlas_client_id
+  mongo_atlas_client_secret            = var.mongo_atlas_client_secret
   mongo_atlas_client_secret_expiration = timeadd(time_static.build_time.rfc3339, "8760h")
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7

@@ -1,6 +1,6 @@
 output "vnet" {
   value = {
-    name = module.network.vnet_name
+    name                = module.network.vnet_name
     resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
   }
 }

@@ -9,8 +9,9 @@
 ## [DevOps Module](../../modules/devops/readme.md)
 
 - Provisions the core resource group for state and identity management.
-- Creates the Infrastructure resource group (which will be used in the step 01)
-- Creates the Application resource group (which will be used in the step 02). This is optional since the step 02 is just to test the connection with the deployed cluster.
+- Creates Infrastructure resource groups (per region for multi-region, single for single-region).
+- Creates Application resource groups (per region for multi-region, single for single-region). This is optional since step 02 is just to test the connection with the deployed cluster.
+- Defines region configurations including address spaces and subnet prefixes for use in subsequent steps.
 - Creates a storage account and container for Terraform remote state.
 - Sets up federated identity and role assignments for automation.
 

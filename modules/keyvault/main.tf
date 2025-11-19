@@ -6,7 +6,7 @@ resource "azurerm_key_vault" "self" {
   sku_name                   = "standard"
   purge_protection_enabled   = var.purge_protection_enabled
   soft_delete_retention_days = var.soft_delete_retention_days
-
+  enable_rbac_authorization  = true
   network_acls {
     # If open_access is true, allow all; if false, restrict to VNet subnets
     default_action = var.open_access ? "Allow" : "Deny"
@@ -21,7 +21,7 @@ resource "azurerm_key_vault_secret" "mongo_atlas_client_secret" {
   content_type    = "MongoDB Atlas Client Secret"
   expiration_date = var.mongo_atlas_client_secret_expiration
 
-  depends_on = [azurerm_key_vault_access_policy.admin_kv_policy]
+  depends_on = [azurerm_role_assignment.admin_kv_rbac]
 }
 
 resource "azurerm_private_dns_zone" "vaultcore" {
@@ -55,12 +55,8 @@ resource "azurerm_private_endpoint" "keyvault" {
   }
 }
 
-resource "azurerm_key_vault_access_policy" "admin_kv_policy" {
-  key_vault_id = azurerm_key_vault.self.id
-  tenant_id    = var.tenant_id
-  object_id    = var.admin_object_id
-
-  secret_permissions  = ["Get", "Set", "List", "Delete"]
-  key_permissions     = ["Get", "Delete"]
-  storage_permissions = ["Get", "Delete"]
+resource "azurerm_role_assignment" "admin_kv_rbac" {
+  scope                = azurerm_key_vault.self.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = var.admin_object_id
 }

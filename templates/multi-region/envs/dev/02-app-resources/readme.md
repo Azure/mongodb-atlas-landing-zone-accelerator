@@ -19,14 +19,7 @@ Since it is Multi-Region, this step is able to deploy the Azure resources in the
 
 ### Required Manual Configuration
 
-Before running this step, you need to:
-
-**Review Network Configuration**:
-
-* Verify the `region_addresses` in `locals.tf` align with your network design.
-* Ensure the subnet CIDR doesn't conflict with existing subnets.
-
-**Note:** For more information on How to Deploy manually, please follow [Deploy-with-manual-steps](../../../../../docs/wiki/Deploy-with-manual-steps.md).
+For information on How to Deploy manually, please follow [Deploy-with-manual-steps](../../../../../docs/wiki/Deploy-with-manual-steps.md).
 
 ## What This Step Deploys
 
@@ -63,14 +56,13 @@ Follow the detailed guide: [Database Connection Testing Guide](../../../../../do
 
 * **app\_information\_by\_region**: Contains application-specific configurations for each region, including:
   * **resource\_group\_name**: Generated in step `00-devops`.
-  * **location**: Region name. Default is derived from the Step 1 outputs.
+  * **location**: Generated in step `00-devops`.
   * **app\_service\_plan\_name**: Generated dynamically with Azure Naming Module.
   * **app\_service\_plan\_sku**: Default is set to `B1`.
   * **app\_web\_app\_name**: Generated dynamically with Azure Naming Module.
-  * **virtual\_network\_name**: Retrieved from the Step 1 remote state.
+  * **virtual\_network\_name**: Generated in step `01-base-infra`.
   * **subnet\_name**: Generated dynamically with Azure Naming Module.
-  * **address\_prefixes**: Default address prefixes are set to `10.0.0.32/29`, `10.0.0.72/29` and `10.0.0.88/29` in `region_addresses`.
-  > The default addresses set here are placeholders for the template. To run this template, you must provide your own IP addresses.
+  * **address\_prefixes**: Generated in step `00-devops`.
 
 ### Tags
 

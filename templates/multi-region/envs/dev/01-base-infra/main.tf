@@ -194,7 +194,7 @@ module "observability" {
 
 data "azurerm_resource_group" "infrastructure_rgs" {
   for_each = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
-  name = each.value.name
+  name     = each.value.name
 }
 
 # Diagnostic settings for all Azure resources
@@ -237,9 +237,8 @@ module "monitoring_diagnostics" {
   ]
 }
 
-resource "azurerm_key_vault_access_policy" "function_app_kv_policy" {
-  key_vault_id       = module.kv.key_vault_id
-  tenant_id          = data.azurerm_client_config.current.tenant_id
-  object_id          = module.observability.function_app_identity_principal_id
-  secret_permissions = ["Get", "List"]
+resource "azurerm_role_assignment" "function_app_kv_rbac" {
+  scope                = module.kv.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.observability.function_app_identity_principal_id
 }

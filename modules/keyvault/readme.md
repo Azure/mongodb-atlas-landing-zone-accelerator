@@ -7,11 +7,13 @@ This Terraform module creates an Azure Key Vault with secure storage for MongoDB
 ## Features
 
 - **Secure Secret Storage**: Stores MongoDB Atlas client secret with expiration date and content type metadata
+- **RBAC Authorization**: Uses Azure RBAC for access control instead of legacy access policies
 - **Network Security**: Configurable network ACLs to restrict access to specific VNet subnets
 - **Private Endpoint**: Secure private connectivity to Key Vault from within the VNet
-- **Purge Protection**: Enabled by default to prevent accidental deletion
-- **Soft Delete**: 7-day retention for deleted secrets
-- **Access Policies**: Built-in access policy for administrators
+- **Private DNS Zone**: Automatic DNS configuration for private endpoint resolution
+- **Purge Protection**: Configurable purge protection to prevent accidental deletion
+- **Soft Delete**: Configurable retention (7-90 days) for deleted secrets
+- **Administrator Role**: Built-in RBAC role assignment for Key Vault Administrator
 
 ## Usage
 
@@ -109,12 +111,15 @@ The module supports two network access modes via the `open_access` variable:
 ### Restricted Access (Production - Recommended)
 When `open_access = false` (default):
 - Network ACL default action is set to **Deny**
-- No Azure services can bypass network restrictions (`bypass = "None"`); access is only possible through the configured private endpoint
+- No Azure services can bypass network restrictions (`bypass = "None"`)
+- Access is only possible through the configured private endpoint
+- Uses RBAC authorization for fine-grained access control
 - Ideal for production environments following zero-trust principles
 
 ### Open Access (Development/Testing)
 When `open_access = true`:
 - Network ACL default action is set to **Allow**
 - Public access is permitted
+- RBAC authorization is still enforced for identity-based access control
 - Useful during initial setup or development
 - **Not recommended for production**
