@@ -73,7 +73,7 @@ These `local.tfvars` files will be used when deploying with manual steps.
 
 ### GitHub Environment Requirements
 
-Before running the pipeline, you must create a GitHub environment named `dev` in your repository settings.  
+Before running the pipeline, you must create a GitHub environment named `dev` in your repository settings.
 Follow the official [Creating a GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) guide for detailed instructions.
 
 ---
@@ -109,21 +109,21 @@ In the `dev` environment, set the following secrets and variables:
 | `TF_VAR_storage_account_name_tfstate`  | Name of the Azure Storage Account for Terraform state.                                    | `sttfdev147`                                         |
 | `TF_VAR_container_name_tfstate`        | Name of the Storage Account container for Terraform state.                                | `tfstate`                                            |
 | `TF_VAR_key_name_tfstate`              | Key (filename) of the Terraform state for the DevOps deployment.                          | `devops.tfstate`                                     |
-| `INFRA_RG_NAME`                        | Name of the Resource Group created for infrastructure resources.                          | `rg-infra`                                           |
+| `FUNCTIONAPP_RG_NAME`                  | Name of the Resource Group created for infrastructure resources where the Function app is deployed. For Multi Region, by default is the Zone A resource group.                          | `rg-infra`                                           |
 | `TF_VAR_open_access`                   | Boolean flag to control open (true) or restricted (false) Key Vault and Azure Function network access.       | `true` or `false`                                    |
 
 ---
 
 #### *Optional Variables (for Test DB Connection App)*
 
-*These variables are only required if deploying the test database connection application.  
+*These variables are only required if deploying the test database connection application.
 They must be configured **after running the Application pipeline step**, when app(s) are created and their names known.*
 
 | Name                          | Description                                                           | Sample Value                       |
 |-------------------------------|-----------------------------------------------------------------------|------------------------------------|
 | `TF_VAR_key_name_infra_tfstate` | Key (filename) of the Terraform state for infrastructure resources. | `01-base-infra.tfstate`                      |
-| `APP_RG_NAME`                   | Resource Group name for the application step resources.             | `rg-app`                   |
-| `APP_WEBAPPS`                   | Comma-separated list of Web App names. Single for single-region; multiple for multi-region. | `app-application` (single) or `app-application-eastus,app-application-eastus2` (multi) |
+| `APP_WEBAPPS`                   | Comma-separated list of Web App names. Single for single-region; multiple for multi-region. | `app-application` (single) or `app-application-zoneA,app-application-zoneB, app-application-zoneC` (multi) |
+| `APP_WEBAPPS_RG_NAMES`          | Comma-separated list of Web App Resource Group names for the application step resources.            | `rg-app-application` (single) or `rg-app-application-zoneA,rg-app-application-zoneB, rg-app-application-zoneC` (multi) |
 | `FUNCTION_APP_NAME`             | Name of the Azure Function App created in the infra step (step 1). | `func-infrasingregion`         |
 - **Important:**
   - You will find the org id in the organization's settings as shown below:
