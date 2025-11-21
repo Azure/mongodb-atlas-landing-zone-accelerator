@@ -31,11 +31,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ inputs.tf_version }}
 
@@ -46,7 +51,7 @@ jobs:
 
       - name: Post format comment
         if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.fmt.outcome == 'success' || steps.fmt.outcome == 'failure') }}
-        uses: GetTerminus/terraform-pr-commenter@v3
+        uses: GetTerminus/terraform-pr-commenter@93a60116ff139d4e9b92b2b61ddc15ebfbdb89c6 # v3.0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TF_WORKSPACE: ${{ inputs.working_directory }}
@@ -56,12 +61,12 @@ jobs:
           commenter_exitcode: ${{ steps.fmt.outputs.exitcode }}
 
       - name: Cache plugin dir
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/.tflint.d/plugins
           key: ubuntu-latest-tflint-${{ hashFiles('.tflint.hcl') }}
 
-      - uses: terraform-linters/setup-tflint@v4
+      - uses: terraform-linters/setup-tflint@90f302c255ef959cbfb4bd10581afecdb7ece3e6 # v4.1.1
         name: Setup TFLint
         with:
           tflint_version: v0.52.0
@@ -79,7 +84,7 @@ jobs:
 
       - name: Checkov GitHub Action
         id: checkov
-        uses: bridgecrewio/checkov-action@v10
+        uses: bridgecrewio/checkov-action@856690c79fbb0457e734fa140d1cf4b1bdef4cd9 # v10
 
   plan:
     name: Plan
@@ -93,16 +98,21 @@ jobs:
       tf_plan_name: ${{ env.TF_PLAN_NAME }}
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ inputs.tf_version }}
 
       - name: 'Azure CLI login'
-        uses: azure/login@v2.1.0
+        uses: azure/login@6b2456866fc08b011acb422a92a4aa20e2c4de32 # v2.1.0
         with:
           client-id: ${{ vars.ARM_CLIENT_ID }}
           tenant-id: ${{ vars.ARM_TENANT_ID }}
@@ -128,7 +138,7 @@ jobs:
 
       - name: Post init comment
         if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.init.outcome == 'success' || steps.init.outcome == 'failure') }}
-        uses: GetTerminus/terraform-pr-commenter@v3
+        uses: GetTerminus/terraform-pr-commenter@93a60116ff139d4e9b92b2b61ddc15ebfbdb89c6 # v3.0.5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TF_WORKSPACE: ${{ inputs.working_directory }}
@@ -163,7 +173,7 @@ jobs:
           TF_VAR_open_access: ${{ vars.TF_VAR_open_access }}
 
       - name: Post plan comment
-        uses: GetTerminus/terraform-pr-commenter@v3.0.3
+        uses: GetTerminus/terraform-pr-commenter@7f94331232e2a9c9e94c80316e6dcd683aeaf0a4 # v3.0.3
         if: ${{ !cancelled() && github.event_name == 'pull_request' && (steps.plan.outcome == 'success' || steps.plan.outcome == 'failure') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -174,7 +184,7 @@ jobs:
           commenter_exitcode: ${{ steps.plan.outputs.exitcode }}
 
       - name: Archive terraform plan
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{env.TF_PLAN_NAME}}
           path: ${{inputs.working_directory}}/${{env.TF_PLAN_NAME}}
@@ -192,8 +202,13 @@ jobs:
       issues: write
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - name: Await Manual Approval
-        uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@74d99dff7380e3e4b122d4ededcbca2b6ce59367 # v1.12.0
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: githubUsername1,githubUsername2 # replace with actual GitHub usernames
@@ -213,16 +228,21 @@ jobs:
       TF_PLAN_NAME: ${{ needs.plan.outputs.tf_plan_name }}
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - name: 'Checkout'
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: ${{ inputs.tf_version }}
 
       - name: 'Azure CLI login'
-        uses: azure/login@v2.1.0
+        uses: azure/login@6b2456866fc08b011acb422a92a4aa20e2c4de32 # v2.1.0
         with:
           client-id: ${{ vars.ARM_CLIENT_ID }}
           tenant-id: ${{ vars.ARM_TENANT_ID }}
@@ -230,7 +250,7 @@ jobs:
           allow-no-subscriptions: false
 
       - name: Download a single artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ${{ env.TF_PLAN_NAME }}
           path: ${{ inputs.working_directory }}

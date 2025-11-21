@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: Conftest
         env:
@@ -39,10 +44,15 @@ jobs:
     outputs:
       examples: ${{ steps.getexamples.outputs.examples }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: get examples
         id: getexamples
-        uses: Azure/terraform-azurerm-avm-template/.github/actions/e2e-getexamples@main
+        uses: Azure/terraform-azurerm-avm-template/.github/actions/e2e-getexamples@8bd78c5718029e40762cac4b4966729662caa24c # main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -52,6 +62,11 @@ jobs:
     outputs:
       setup_exists: ${{ steps.check-setup.outputs.setup_exists }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: Check if setup.sh exists
         id: check-setup
@@ -69,6 +84,11 @@ jobs:
     environment: test
     needs: checksetup
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: Run global setup script
         env:
@@ -111,6 +131,11 @@ jobs:
         example: ${{ fromJson(needs.getexamples.outputs.examples) }}
       fail-fast: false
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
 
       - name: Test example
@@ -143,6 +168,11 @@ jobs:
     outputs:
       teardown_exists: ${{ steps.check-teardown.outputs.teardown_exists }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: Check if teardown.sh exists
         id: check-teardown
@@ -160,6 +190,11 @@ jobs:
     environment: test
     needs: checkteardown
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
       - name: Run teardown script
         env:
@@ -196,4 +231,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: testexamples
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
       - run: echo "All tests passed"

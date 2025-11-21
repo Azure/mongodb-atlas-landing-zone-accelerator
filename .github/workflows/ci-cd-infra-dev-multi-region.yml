@@ -51,14 +51,19 @@ jobs:
       modules: ${{ steps.changes.outputs.modules }}
       tf_version: ${{ steps.read_tf.outputs.tf_version }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@95d9a5deda9de15063e7595e9719c11c38c90ae2 # v2.13.2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       - name: Read Terraform version
         id: read_tf
         run: |
           TF_VERSION=$(cat .terraform-version)
           echo "TF_VERSION=$TF_VERSION" >> $GITHUB_ENV
           echo "tf_version=$TF_VERSION" >> $GITHUB_OUTPUT
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@4512585405083f25c027a35db413c2b3b9006d50 # v2.11.1
         id: changes
         with:
           filters: |

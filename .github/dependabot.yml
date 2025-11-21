@@ -1,0 +1,16 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /MongoAtlasMetrics/MongoAtlasMetrics
+    schedule:
+      interval: daily
+
+  - package-ecosystem: nuget
+    directory: /test-db-connection/test-pe-db-connection/test-pe-db-connection
+    schedule:
+      interval: daily
