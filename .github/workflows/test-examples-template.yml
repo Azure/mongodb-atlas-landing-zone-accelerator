@@ -4,6 +4,8 @@ name: test example modules
 on:
   workflow_call:
 
+permissions: read-all
+
 jobs:
   conftest:
     if: github.event.pull_request.head.repo.fork == false
