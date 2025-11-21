@@ -7,108 +7,29 @@ resource "azurerm_virtual_network" "this" {
 }
 
 resource "azurerm_network_security_group" "nsg" {
-  name                = var.nsg_name
+  for_each            = { for k, v in var.subnets : k => v if v != null }
+  name                = "${var.nsg_name}-${each.key}"
   location            = var.location
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  # Allow traffic originating from inside the VNet to any destination within the VNet
-  security_rule {
-    name                       = "AllowVNetInbound"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_address_prefix      = "VirtualNetwork"
-    destination_address_prefix = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    description                = "Allow inbound traffic from within the Virtual Network."
+  dynamic "security_rule" {
+    for_each = each.value.security_rules
+    content {
+      name                       = security_rule.value.name
+      priority                   = security_rule.value.priority
+      direction                  = security_rule.value.direction
+      access                     = security_rule.value.access
+      protocol                   = security_rule.value.protocol
+      source_address_prefix      = security_rule.value.source_address_prefix
+      destination_address_prefix = security_rule.value.destination_address_prefix
+      source_port_range          = security_rule.value.source_port_range
+      destination_port_range     = security_rule.value.destination_port_range
+      description                = security_rule.value.description
+    }
+
   }
 
-  # Block any inbound traffic coming in from the public Internet
-  security_rule {
-    name                       = "DenyInternetInbound"
-    priority                   = 200
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_address_prefix      = "Internet"
-    destination_address_prefix = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    description                = "Deny inbound traffic from the public Internet."
-  }
-
-  # Default deny rule for inbound traffic, denies all inbound connections not previously allowed or denied
-  security_rule {
-    name                       = "DenyAllInbound"
-    priority                   = 4096
-    direction                  = "Inbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    description                = "Deny all other inbound traffic by default."
-  }
-
-  # Allow outbound traffic to any resource within the VNet (east-west communication)
-  security_rule {
-    name                       = "AllowVNetOutbound"
-    priority                   = 100
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "VirtualNetwork"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    description                = "Allow outbound traffic to resources within the Virtual Network."
-  }
-
-  # Allow outbound UDP traffic to Azure DNS (required for DNS resolution)
-  security_rule {
-    name                       = "AllowDNS"
-    priority                   = 110
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Udp"
-    source_address_prefix      = "*"
-    destination_address_prefix = "AzureDNS"
-    source_port_range          = "*"
-    destination_port_range     = "53"
-    description                = "Allow outbound UDP traffic to Azure DNS for DNS resolution (port 53)."
-  }
-
-  # Allow outbound HTTPS connections to the Internet (for example, to access external APIs such as MongoDB Atlas)
-  security_rule {
-    name                       = "AllowInternetHTTPS"
-    priority                   = 120
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_address_prefix      = "*"
-    destination_address_prefix = "Internet"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    description                = "Allow outbound TCP traffic to the Internet on port 443 for secure API calls (e.g., MongoDB Atlas Metrics API)."
-  }
-
-  # Deny all other outbound traffic not explicitly allowed above
-  security_rule {
-    name                       = "DenyAllOutbound"
-    priority                   = 4096
-    direction                  = "Outbound"
-    access                     = "Deny"
-    protocol                   = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    description                = "Deny all other outbound traffic by default."
-  }
 }
 
 resource "azurerm_subnet" "subnets" {
@@ -141,7 +62,7 @@ resource "azurerm_subnet" "subnets" {
 resource "azurerm_subnet_network_security_group_association" "nsg_association" {
   for_each                  = azurerm_subnet.subnets
   subnet_id                 = each.value.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
+  network_security_group_id = azurerm_network_security_group.nsg[each.key].id
 }
 
 resource "azurerm_private_endpoint" "pe" {

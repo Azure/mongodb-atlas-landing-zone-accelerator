@@ -40,13 +40,13 @@ module "monitoring" {
   pe_name                         = "pep-monitoring"
   network_interface_name          = "nic-monitoring"
   private_service_connection_name = "psc-monitoring"
-
+  
   # Optional: customize workspace settings
   sku                        = "PerGB2018"
   retention_in_days          = 30
   internet_ingestion_enabled = false
   internet_query_enabled     = true
-
+  
   tags = {
     Environment = "dev"
     Project     = "myapp"
@@ -72,10 +72,10 @@ module "monitoring_zonea" {
   pe_name                         = "pep-monitoring-zonea"
   network_interface_name          = "nic-monitoring-zonea"
   private_service_connection_name = "psc-monitoring-zonea"
-
+  
   # Create DNS zones in first region
   create_private_dns_zones = true
-
+  
   tags = local.tags
 }
 
@@ -92,11 +92,11 @@ module "monitoring_zoneb" {
   enable_ampls_pe                 = false  # No AMPLS PE in this region
   create_app_insights             = false
   create_private_link_scope       = false
-
+  
   # Reuse DNS zones from first region
   create_private_dns_zones = false
   private_dns_zone_ids     = module.monitoring_zonea.private_dns_zone_ids
-
+  
   tags = local.tags
 }
 ```

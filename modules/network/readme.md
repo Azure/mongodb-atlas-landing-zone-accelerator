@@ -30,6 +30,20 @@ module "network" {
     private = {
       name             = "snet-mongodb-private"
       address_prefixes = ["10.0.0.0/29"]
+      security_rules   = {
+        deny_all_inbound = {
+          name                       = "DenyAllInbound"
+          priority                   = 110
+          direction                  = "Inbound"
+          access                     = "Deny"
+          protocol                   = "*"
+          source_address_prefix      = "*"
+          destination_address_prefix = "*"
+          source_port_range          = "*"
+          destination_port_range     = "*"
+          description                = "Deny all inbound traffic by default."
+        }
+      }
     }
     function_app = {
       name             = "snet-function-app"
@@ -84,19 +98,19 @@ module "network" {
 
 ## Inputs
 
-| Name                      | Description                                                                                              | Type                          | Required | Default |
-|---------------------------|----------------------------------------------------------------------------------------------------------|-------------------------------|----------|---------|
-| `vnet_name`               | Name of the virtual network                                                                              | `string`                      | Yes      | -       |
-| `location`                | Azure region for the resources                                                                           | `string`                      | Yes      | -       |
-| `resource_group_name`     | Resource group for all resources                                                                         | `string`                      | Yes      | -       |
-| `address_space`           | Address space for the VNet                                                                               | `list(string)`                | Yes      | -       |
-| `nsg_name`                | Name of the network security group                                                                       | `string`                      | Yes      | -       |
-| `subnets`                 | Map of subnet configurations with name, address_prefixes, optional delegation and service_endpoints      | `map(object)`                 | Yes      | -       |
-| `private_endpoints`       | Map of private endpoint configurations                                                                   | `map(object)`                 | No       | `{}`    |
-| `project_id`              | MongoDB Atlas project ID                                                                                 | `string`                      | Yes      | -       |
-| `private_link_id`         | MongoDB Atlas private link ID                                                                            | `string`                      | Yes      | -       |
-| `mongodb_pe_endpoint_key` | The key in private_endpoints map for the MongoDB endpoint                                                | `string`                      | Yes      | -       |
-| `tags`                    | Tags to apply to all resources                                                                           | `map(string)`                 | No       | `{}`    |
+| Name                      | Description                                                                                                              | Type                          | Required | Default |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------|-------------------------------|----------|---------|
+| `vnet_name`               | Name of the virtual network                                                                                              | `string`                      | Yes      | -       |
+| `location`                | Azure region for the resources                                                                                           | `string`                      | Yes      | -       |
+| `resource_group_name`     | Resource group for all resources                                                                                         | `string`                      | Yes      | -       |
+| `address_space`           | Address space for the VNet                                                                                               | `list(string)`                | Yes      | -       |
+| `nsg_name`                | Name of the network security group                                                                                       | `string`                      | Yes      | -       |
+| `subnets`                 | Map of subnet configurations with name, address_prefixes, security_rules, optional delegation and service_endpoints      | `map(object)`                 | Yes      | -       |
+| `private_endpoints`       | Map of private endpoint configurations                                                                                   | `map(object)`                 | No       | `{}`    |
+| `project_id`              | MongoDB Atlas project ID                                                                                                 | `string`                      | Yes      | -       |
+| `private_link_id`         | MongoDB Atlas private link ID                                                                                            | `string`                      | Yes      | -       |
+| `mongodb_pe_endpoint_key` | The key in private_endpoints map for the MongoDB endpoint                                                                | `string`                      | Yes      | -       |
+| `tags`                    | Tags to apply to all resources                                                                                           | `map(string)`                 | No       | `{}`    |
 
 ### Subnet Object Structure
 
@@ -105,7 +119,19 @@ Each entry in the `subnets` map should have:
 ```hcl
 {
   name             = string                # Required: Subnet name
-  address_prefixes = list(string)         # Required: Address prefixes (e.g., ["10.0.0.0/24"])
+  address_prefixes = list(string)          # Required: Address prefixes (e.g., ["10.0.0.0/24"])
+  security_rules = map(object({            # Required: Security rules for the NSG
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+    source_port_range          = string
+    destination_port_range     = string
+    description                = string
+  }))
   delegation = optional(object({          # Optional: Subnet delegation
     name = string
     service_delegation = object({
@@ -143,24 +169,3 @@ Each entry in the `private_endpoints` map should have:
 | `subnet_ids`           | Map of subnet keys to subnet IDs                                 |
 | `nsg_id`               | ID of the Network Security Group                                 |
 | `private_endpoint_ids` | Map of private endpoint keys to private endpoint IDs             |
-
-## Network Security Group Rules
-
-The module automatically creates the following NSG rules:
-
-### Inbound Rules
-
-| Priority | Name                  | Action | Protocol | Source            | Destination | Ports | Description                                    |
-|----------|-----------------------|--------|----------|-------------------|-------------|-------|------------------------------------------------|
-| 100      | AllowVNetInbound      | Allow  | *        | VirtualNetwork    | *           | *     | Allow inbound traffic from within the VNet     |
-| 200      | DenyInternetInbound   | Deny   | *        | Internet          | *           | *     | Deny inbound traffic from the public Internet  |
-| 4096     | DenyAllInbound        | Deny   | *        | *                 | *           | *     | Deny all other inbound traffic by default      |
-
-### Outbound Rules
-
-| Priority | Name                 | Action | Protocol | Source | Destination      | Ports | Description                                          |
-|----------|----------------------|--------|----------|--------|------------------|-------|------------------------------------------------------|
-| 100      | AllowVNetOutbound    | Allow  | *        | *      | VirtualNetwork   | *     | Allow outbound traffic within the VNet               |
-| 110      | AllowDNS             | Allow  | UDP      | *      | AzureDNS         | 53    | Allow outbound UDP traffic to Azure DNS              |
-| 120      | AllowInternetHTTPS   | Allow  | TCP      | *      | Internet         | 443   | Allow outbound HTTPS for external API calls          |
-| 4096     | DenyAllOutbound      | Deny   | *        | *      | *                | *     | Deny all other outbound traffic by default           |

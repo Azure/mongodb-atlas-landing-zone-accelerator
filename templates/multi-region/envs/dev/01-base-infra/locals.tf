@@ -70,4 +70,129 @@ locals {
   log_analytics_workspace_sku                        = "PerGB2018"
   log_analytics_workspace_retention_in_days          = 30
   log_analytics_workspace_internet_ingestion_enabled = false
+
+  common_security_rules = {
+
+    # Allow traffic originating from inside the VNet to any destination within the VNet
+    allow_vnet_inbound = {
+      name                       = "AllowAllInFromVNetInbound"
+      priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_address_prefix      = "VirtualNetwork"
+      destination_address_prefix = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      description                = "Allow inbound traffic from within the Virtual Network."
+    }
+
+    # Default deny rule for inbound traffic, denies all inbound connections not previously allowed or denied
+    deny_all_inbound = {
+      name                       = "DenyAllInbound"
+      priority                   = 110
+      direction                  = "Inbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      description                = "Deny all inbound traffic by default."
+    }
+
+    # Deny all outbound traffic not explicitly allowed
+    deny_all_outbound = {
+      name                       = "DenyAllOutbound"
+      priority                   = 4096
+      direction                  = "Outbound"
+      access                     = "Deny"
+      protocol                   = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      description                = "Deny all other outbound traffic by default."
+    }
+  }
+
+  specific_security_rules = {
+    allow_internet_https_outbound = {
+      # Allow outbound HTTPS connections to the Internet (for example, to access external APIs such as MongoDB Atlas)
+      name                       = "AllowInternetHTTPS"
+      priority                   = 120
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_address_prefix      = "*"
+      destination_address_prefix = "Internet"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      description                = "Allow outbound TCP traffic to the Internet on port 443 for secure API calls (e.g., MongoDB Atlas Metrics API)."
+    }
+
+    allow_vnet_outbound = {
+      name                       = "AllowVNetOutbound"
+      priority                   = 100
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "*"
+      source_address_prefix      = "*"
+      destination_address_prefix = "VirtualNetwork"
+      source_port_range          = "*"
+      destination_port_range     = "*"
+      description                = "Allow outbound traffic to resources within the Virtual Network."
+    }
+
+    allow_dns_outbound = {
+      name                       = "AllowDNS"
+      priority                   = 110
+      direction                  = "Outbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_address_prefix      = "*"
+      destination_address_prefix = "AzureDNS"
+      source_port_range          = "*"
+      destination_port_range     = "53"
+      description                = "Allow outbound UDP traffic to Azure DNS for DNS resolution (port 53)."
+    }
+  }
+
+  subnets_definitions = {
+    for k, v in local.regions : k => {
+      private = {
+        name             = v.private_subnet_name
+        address_prefixes = v.private_subnet_prefixes
+        security_rules   = merge(local.common_security_rules, local.specific_security_rules)
+      }
+      observability_function_app = v.deploy_observability_subnets ? {
+        name             = v.observability_function_app_subnet_name
+        address_prefixes = v.observability_function_app_subnet_prefixes
+        security_rules   = merge(local.common_security_rules, local.specific_security_rules)
+        delegation = {
+          name = "functionapp-delegation"
+          service_delegation = {
+            name    = "Microsoft.App/environments"
+            actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+          }
+        }
+      } : null
+      monitoring_ampls = v.deploy_observability_subnets ? {
+        name             = v.monitoring_ampls_subnet_name
+        address_prefixes = v.monitoring_ampls_subnet_prefixes
+        security_rules   = local.common_security_rules
+      } : null
+      keyvault_private_endpoint = v.has_keyvault_private_endpoint ? {
+        name              = v.keyvault_private_endpoint_subnet_name
+        address_prefixes  = v.keyvault_private_endpoint_subnet_prefixes
+        security_rules    = local.common_security_rules
+        service_endpoints = ["Microsoft.KeyVault"]
+      } : null
+      observability_storage_account = v.has_observability_storage_account ? {
+        name             = v.observability_storage_account_subnet_name
+        address_prefixes = v.observability_storage_account_subnet_prefixes
+        security_rules   = local.common_security_rules
+      } : null
+    }
+  }
 }

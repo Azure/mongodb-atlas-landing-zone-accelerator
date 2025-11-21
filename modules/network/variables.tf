@@ -3,6 +3,18 @@ variable "subnets" {
   type = map(object({
     name             = string
     address_prefixes = list(string)
+    security_rules = map(object({
+      name                       = string
+      priority                   = number
+      direction                  = string
+      access                     = string
+      protocol                   = string
+      source_address_prefix      = string
+      destination_address_prefix = string
+      source_port_range          = string
+      destination_port_range     = string
+      description                = string
+    }))
     delegation = optional(object({
       name = string
       service_delegation = object({

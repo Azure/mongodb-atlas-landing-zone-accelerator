@@ -26,36 +26,7 @@ module "network" {
   address_space       = each.value.address_space
   tags                = local.tags
 
-  subnets = {
-    private = {
-      name             = each.value.private_subnet_name
-      address_prefixes = each.value.private_subnet_prefixes
-    }
-    observability_function_app = each.value.deploy_observability_subnets ? {
-      name             = each.value.observability_function_app_subnet_name
-      address_prefixes = each.value.observability_function_app_subnet_prefixes
-      delegation = {
-        name = "functionapp-delegation"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-        }
-      }
-    } : null
-    monitoring_ampls = each.value.deploy_observability_subnets ? {
-      name             = each.value.monitoring_ampls_subnet_name
-      address_prefixes = each.value.monitoring_ampls_subnet_prefixes
-    } : null
-    keyvault_private_endpoint = each.value.has_keyvault_private_endpoint ? {
-      name              = each.value.keyvault_private_endpoint_subnet_name
-      address_prefixes  = each.value.keyvault_private_endpoint_subnet_prefixes
-      service_endpoints = ["Microsoft.KeyVault"]
-    } : null
-    observability_storage_account = each.value.has_observability_storage_account ? {
-      name             = each.value.observability_storage_account_subnet_name
-      address_prefixes = each.value.observability_storage_account_subnet_prefixes
-    } : null
-  }
+  subnets = { for k, v in local.subnets_definitions[each.key] : k => v if v != null }
 
   private_endpoints = {
     mongodb = {

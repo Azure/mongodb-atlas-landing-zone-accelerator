@@ -28,36 +28,7 @@ module "network" {
   nsg_name            = module.naming.network_security_group.name_unique
   tags                = local.tags
 
-  subnets = {
-    private = {
-      name             = local.region_definition.private_subnet_name
-      address_prefixes = local.region_definition.private_subnet_prefixes
-    }
-    observability_function_app = {
-      name             = local.region_definition.observability_function_app_subnet_name
-      address_prefixes = local.region_definition.observability_function_app_subnet_prefixes
-      delegation = {
-        name = "functionapp-delegation"
-        service_delegation = {
-          name    = "Microsoft.App/environments"
-          actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-        }
-      }
-    }
-    monitoring_ampls = {
-      name             = local.region_definition.monitoring_ampls_subnet_name
-      address_prefixes = local.region_definition.monitoring_ampls_subnet_prefixes
-    }
-    observability_storage_account = {
-      name             = local.region_definition.observability_storage_account_subnet_name
-      address_prefixes = local.region_definition.observability_storage_account_subnet_prefixes
-    }
-    keyvault_private_endpoint = {
-      name              = local.region_definition.keyvault_private_endpoint_subnet_name
-      address_prefixes  = local.region_definition.keyvault_private_endpoint_subnet_prefixes
-      service_endpoints = ["Microsoft.KeyVault"]
-    }
-  }
+  subnets = local.subnets_definitions
 
   private_endpoints = {
     mongodb = {
