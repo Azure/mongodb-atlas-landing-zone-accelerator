@@ -25,6 +25,8 @@ on:
         type: boolean
         default: false
 
+permissions: read-all
+
 jobs:
   validate:
     name: Validate
