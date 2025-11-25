@@ -24,6 +24,7 @@ skip-check:
 # Skipped since these are not applicable to our use case. Update them as needed.
   - CKV_AZURE_33
   - CKV_AZURE_59
+  - CKV_AZURE_189
   - CKV_AZURE_190
   - CKV_AZURE_206
   - CKV_TF_1
