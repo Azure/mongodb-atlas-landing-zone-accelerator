@@ -70,7 +70,7 @@ module "network" {
   private_endpoints = {
     mongodb = {
       name                    = "pe-mongodb"
-      subnet_key              = "private"
+      subnet_key              = "app_workload_subnet_prefixes"
       service_connection_name = "psc-mongodb"
       service_resource_id     = module.mongodb_atlas.pe_service_id
       is_manual_connection    = true
@@ -105,7 +105,7 @@ module "network" {
 | `resource_group_name`     | Resource group for all resources                                                                                         | `string`                      | Yes      | -       |
 | `address_space`           | Address space for the VNet                                                                                               | `list(string)`                | Yes      | -       |
 | `nsg_name`                | Name of the network security group                                                                                       | `string`                      | Yes      | -       |
-| `subnets`                 | Map of subnet configurations with name, address_prefixes, security_rules, optional delegation and service_endpoints      | `map(object)`                 | Yes      | -       |
+| `subnets`                 | Map of subnet configurations with name, address_prefixes, security_rules and optional delegation      | `map(object)`                 | Yes      | -       |
 | `private_endpoints`       | Map of private endpoint configurations                                                                                   | `map(object)`                 | No       | `{}`    |
 | `project_id`              | MongoDB Atlas project ID                                                                                                 | `string`                      | Yes      | -       |
 | `private_link_id`         | MongoDB Atlas private link ID                                                                                            | `string`                      | Yes      | -       |
@@ -139,8 +139,7 @@ Each entry in the `subnets` map should have:
       actions = list(string)              # e.g., ["Microsoft.Network/virtualNetworks/subnets/action"]
     })
   }))
-  service_endpoints = optional(list(string))  # Optional: e.g., ["Microsoft.KeyVault"]
-}
+  }
 ```
 
 ### Private Endpoint Object Structure

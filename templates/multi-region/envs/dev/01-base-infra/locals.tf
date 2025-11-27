@@ -37,22 +37,18 @@ locals {
   # For Azure resources
   regions = {
     for k, v in local.region_definitions : k => {
-      location                                      = v.azure_region
-      address_space                                 = v.address_space
-      private_subnet_prefixes                       = v.private_subnet_prefixes
-      private_subnet_name                           = v.private_subnet_name
-      manual_connection                             = true
-      deploy_observability_subnets                  = v.deploy_observability_subnets
-      has_keyvault_private_endpoint                 = v.has_keyvault_private_endpoint
-      has_observability_storage_account             = v.has_observability_storage_account
-      observability_function_app_subnet_prefixes    = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
-      monitoring_ampls_subnet_prefixes              = v.deploy_observability_subnets ? v.monitoring_ampls_subnet_prefixes : null
-      observability_function_app_subnet_name        = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
-      monitoring_ampls_subnet_name                  = v.deploy_observability_subnets ? v.monitoring_ampls_subnet_name : null
-      keyvault_private_endpoint_subnet_prefixes     = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_prefixes : null
-      keyvault_private_endpoint_subnet_name         = v.has_keyvault_private_endpoint ? v.keyvault_private_endpoint_subnet_name : null
-      observability_storage_account_subnet_prefixes = v.has_observability_storage_account ? v.observability_storage_account_subnet_prefixes : null
-      observability_storage_account_subnet_name     = v.has_observability_storage_account ? v.observability_storage_account_subnet_name : null
+      location                                   = v.azure_region
+      address_space                              = v.address_space
+      app_workload_subnet_prefixes               = v.app_workload_subnet_prefixes
+      app_workload_subnet_name                   = v.app_workload_subnet_name
+      manual_connection                          = true
+      deploy_observability_subnets               = v.deploy_observability_subnets
+      has_keyvault_private_endpoint              = v.has_keyvault_private_endpoint
+      has_observability_storage_account          = v.has_observability_storage_account
+      observability_function_app_subnet_prefixes = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
+      observability_function_app_subnet_name     = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
+      private_endpoints_subnet_prefixes          = (v.deploy_observability_subnets || v.has_keyvault_private_endpoint || v.has_observability_storage_account) ? v.private_endpoints_subnet_prefixes : null
+      private_endpoints_subnet_name              = (v.deploy_observability_subnets || v.has_keyvault_private_endpoint || v.has_observability_storage_account) ? v.private_endpoints_subnet_name : null
     }
   }
 
@@ -159,15 +155,16 @@ locals {
   }
 
   subnets_definitions = {
-    for k, v in local.regions : k => {
-      private = {
-        name             = v.private_subnet_name
-        address_prefixes = v.private_subnet_prefixes
+    for region_key, region in local.regions :
+    region_key => {
+      app_workload_subnet_prefixes = {
+        name             = region.app_workload_subnet_name
+        address_prefixes = region.app_workload_subnet_prefixes
         security_rules   = merge(local.common_security_rules, local.specific_security_rules)
       }
-      observability_function_app = v.deploy_observability_subnets ? {
-        name             = v.observability_function_app_subnet_name
-        address_prefixes = v.observability_function_app_subnet_prefixes
+      observability_function_app = region.deploy_observability_subnets ? {
+        name             = region.observability_function_app_subnet_name
+        address_prefixes = region.observability_function_app_subnet_prefixes
         security_rules   = merge(local.common_security_rules, local.specific_security_rules)
         delegation = {
           name = "functionapp-delegation"
@@ -177,20 +174,13 @@ locals {
           }
         }
       } : null
-      monitoring_ampls = v.deploy_observability_subnets ? {
-        name             = v.monitoring_ampls_subnet_name
-        address_prefixes = v.monitoring_ampls_subnet_prefixes
-        security_rules   = local.common_security_rules
-      } : null
-      keyvault_private_endpoint = v.has_keyvault_private_endpoint ? {
-        name              = v.keyvault_private_endpoint_subnet_name
-        address_prefixes  = v.keyvault_private_endpoint_subnet_prefixes
-        security_rules    = local.common_security_rules
-        service_endpoints = ["Microsoft.KeyVault"]
-      } : null
-      observability_storage_account = v.has_observability_storage_account ? {
-        name             = v.observability_storage_account_subnet_name
-        address_prefixes = v.observability_storage_account_subnet_prefixes
+      private_endpoints = (
+        region.deploy_observability_subnets ||
+        region.has_keyvault_private_endpoint ||
+        region.has_observability_storage_account
+        ) ? {
+        name             = region.private_endpoints_subnet_name
+        address_prefixes = region.private_endpoints_subnet_prefixes
         security_rules   = local.common_security_rules
       } : null
     }

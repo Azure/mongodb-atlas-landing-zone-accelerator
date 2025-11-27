@@ -9,7 +9,7 @@ module "application" {
   # Network Configuration
   virtual_network_name     = local.virtual_network_name
   subnet_name              = local.subnet_name
-  address_prefixes         = local.region_definition.app_subnet_prefixes
+  address_prefixes         = local.region_definition.test_app_subnet_prefixes
   vnet_resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
 
   # Web App Configuration

@@ -40,21 +40,17 @@ locals {
   # Note: The proposed address space is for demonstration purposes. Please update them as needed.
   region_definition = {
     "unique" = {
-      atlas_region                                  = "US_CENTRAL"
-      azure_region                                  = "centralus"
-      priority                                      = 7
-      vnet_address_space                            = ["10.0.0.0/24"]
-      private_subnet_prefixes                       = ["10.0.0.0/28"]
-      observability_function_app_subnet_prefixes    = ["10.0.0.16/28"]
-      keyvault_private_endpoint_subnet_prefixes     = ["10.0.0.32/27"]
-      monitoring_ampls_subnet_prefixes              = ["10.0.0.64/27"]
-      observability_storage_account_subnet_prefixes = ["10.0.0.96/27"]
-      app_subnet_prefixes                           = ["10.0.0.128/28"]
-      private_subnet_name                           = "${module.infrastructure_naming.subnet.name_unique}-mongodb-private-endpoint"
-      observability_function_app_subnet_name        = "${module.infrastructure_naming.subnet.name_unique}-function-app"
-      monitoring_ampls_subnet_name                  = "${module.infrastructure_naming.subnet.name_unique}-monitoring-ampls"
-      observability_storage_account_subnet_name     = "${module.infrastructure_naming.subnet.name_unique}-observability-sa-private-endpoint"
-      keyvault_private_endpoint_subnet_name         = "${module.infrastructure_naming.subnet.name_unique}-kv-private-endpoint"
+      atlas_region                               = "US_CENTRAL"
+      azure_region                               = "centralus"
+      priority                                   = 7
+      address_space                              = ["10.0.0.0/25"]
+      app_workload_subnet_prefixes               = ["10.0.0.0/28"]
+      observability_function_app_subnet_prefixes = ["10.0.0.16/28"]
+      private_endpoints_subnet_prefixes          = ["10.0.0.32/27"]
+      test_app_subnet_prefixes                   = ["10.0.0.64/28"] # This subnet is for step 2, which is optional and used to validate the connection with the cluster.
+      private_subnet_name                        = "${module.infrastructure_naming.subnet.name_unique}-mongodb-app-workload-endpoint"
+      observability_function_app_subnet_name     = "${module.infrastructure_naming.subnet.name_unique}-function-app"
+      private_endpoints_subnet_name              = "${module.infrastructure_naming.subnet.name_unique}-shared-private-endpoints"
     }
   }
 }

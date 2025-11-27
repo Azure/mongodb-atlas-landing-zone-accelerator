@@ -26,9 +26,10 @@ module "devops" {
 }
 
 module "mongodb_marketplace" {
-  source            = "../../../../../modules/mongodb_marketplace"
-  count             = var.should_create_mongo_org ? 1 : 0
-  location          = local.location
+  source = "../../../../../modules/mongodb_marketplace"
+  count  = var.should_create_mongo_org ? 1 : 0
+  # Currently the MongoDB Marketplace offering is only available in East US 2
+  location          = "eastus2"
   subscription_id   = local.subscription_id
   resource_group_id = module.devops.identity_info.devops_resource_group_id
 

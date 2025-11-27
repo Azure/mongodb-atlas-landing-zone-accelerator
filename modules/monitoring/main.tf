@@ -206,5 +206,10 @@ resource "azurerm_private_endpoint" "monitoring_ampls_pe" {
     ]
   }
 
+  depends_on = [
+    azurerm_monitor_private_link_scoped_service.workspace_assoc,
+    azurerm_monitor_private_link_scoped_service.appinsights_assoc
+  ]
+
   tags = var.tags
 }

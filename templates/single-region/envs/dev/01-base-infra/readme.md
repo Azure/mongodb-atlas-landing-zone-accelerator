@@ -33,12 +33,10 @@ This configuration creates:
 
 - **MongoDB Atlas Cluster**: Single-region cluster with backup enabled by default, but it can be turned off if specified.
 - **Virtual Network**: Dedicated VNet for the cluster.
-- **Private Subnets**: 
-  - Private subnet for MongoDB Atlas connectivity
+- **App Workload Subnets**: 
+  - App workload subnet for MongoDB Atlas connectivity
   - Function app subnet for observability resources
-  - Monitoring AMPLS subnet
-  - Key Vault private endpoint subnet
-  - Observability storage account subnet
+  - A single shared Private Endpoint subnet for all Azure Private Endpoints (Monitoring, Key Vault, Observability, etc.)
 - **Private Endpoint**: Secure connection to MongoDB Atlas.
 - **Monitoring Resources**:
   - Log Analytics Workspace
@@ -96,12 +94,10 @@ Follow the detailed guide: [Application Resources Guide](../02-app-resources/rea
 ### Networking Settings
 
 Networking configurations are derived from region definition in Step 0. The values in `locals.tf` include:
-- **vnet_address_space**: Address space for the virtual network
-- **private_subnet_prefixes**: Prefixes for private subnets (MongoDB connectivity)
+- **address_space**: Address space for the virtual network
+- **app_workload_subnet_prefixes**: Prefixes for the application workload subnet (MongoDB connectivity)
 - **observability_function_app_subnet_prefixes**: Prefixes for Observability Function App subnet
-- **monitoring_ampls_subnet_prefixes**: Prefixes for monitoring AMPLS subnet
-- **keyvault_private_endpoint_subnet_prefixes**: Prefixes for Key Vault private endpoint subnet
-- **observability_storage_account_subnet_prefixes**: Prefixes for observability storage account subnet
+- **private_endpoints_subnet_prefixes**: CIDR ranges for the shared Private Endpoint subnet used by all Azure PEs (Monitoring, Key Vault, Observability, etc.)
 
 ### Security Settings
 
