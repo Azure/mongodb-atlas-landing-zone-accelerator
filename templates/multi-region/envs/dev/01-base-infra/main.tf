@@ -31,11 +31,11 @@ module "network" {
   private_endpoints = {
     mongodb = {
       name                    = "${module.naming.private_endpoint.name_unique}-mongodb-${each.key}"
-      subnet_key              = "private"
+      subnet_key              = "app_workload_subnet_prefixes"
       service_connection_name = "${module.naming.private_service_connection.name}-mongodb-${each.key}"
       service_resource_id     = module.mongodb_atlas_config.atlas_pe_service_ids[each.key]
       is_manual_connection    = each.value.manual_connection
-      request_message         = "Please approve my MongoDB PE."
+      request_message         = "Mongo DB Atlas Private Endpoint connection from ${local.project_name}."
       tags                    = local.tags
     }
   }
@@ -91,7 +91,7 @@ module "monitoring" {
 
   # AMPLS PE configuration (only for zones with monitoring subnets)
   enable_ampls_pe    = each.key == "zoneA" && each.value.deploy_observability_subnets
-  ampls_pe_subnet_id = each.value.deploy_observability_subnets ? module.network[each.key].subnet_ids["monitoring_ampls"] : null
+  ampls_pe_subnet_id = each.value.deploy_observability_subnets ? module.network[each.key].subnet_ids["private_endpoints"] : null
 
   # DNS zones: Create in first region (zoneA), reuse in others
   create_private_dns_zones = each.key == "zoneA"
@@ -123,7 +123,7 @@ module "kv" {
   admin_object_id                      = data.azurerm_client_config.current.object_id
   open_access                          = var.open_access
   mongo_atlas_client_secret_expiration = local.mongo_atlas_client_secret_expiration
-  private_endpoint_subnet_id           = module.network["zoneA"].subnet_ids["keyvault_private_endpoint"]
+  private_endpoint_subnet_id           = module.network["zoneA"].subnet_ids["private_endpoints"]
   private_endpoint_name                = "${module.naming.private_endpoint.name_unique}kv"
   private_service_connection_name      = "${module.naming.private_service_connection.name_unique}kv"
   vnet_id                              = module.network["zoneA"].vnet_id
@@ -150,7 +150,7 @@ module "observability" {
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
-  storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["observability_storage_account"]
+  storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["private_endpoints"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
   blob_private_dns_zone_id         = module.monitoring["zoneA"].private_dns_zone_ids["blob"]

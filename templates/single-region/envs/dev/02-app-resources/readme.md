@@ -60,7 +60,7 @@ Follow the detailed guide: [Database Connection Testing Guide](../../../../../do
 * **app\_web\_app\_name**: Generated dynamically using the Azure Naming Module
 * **virtual\_network\_name**: Retrieved from Step 1 remote state
 * **subnet\_name**: Generated dynamically using the Azure Naming Module
-* **address\_prefixes**: Retrieved from Step 0 region definition (`app_subnet_prefixes`)
+* **address\_prefixes**: Retrieved from Step 0 region definition (`test_app_subnet_prefixes`)
 
 ### Tags
 

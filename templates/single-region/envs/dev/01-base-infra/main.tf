@@ -24,7 +24,7 @@ module "network" {
   location            = local.region_definition.azure_region
   resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
   vnet_name           = module.naming.virtual_network.name
-  address_space       = local.region_definition.vnet_address_space
+  address_space       = local.region_definition.address_space
   nsg_name            = module.naming.network_security_group.name_unique
   tags                = local.tags
 
@@ -33,7 +33,7 @@ module "network" {
   private_endpoints = {
     mongodb = {
       name                    = "${module.naming.private_endpoint.name_unique}-mongodb"
-      subnet_key              = "private"
+      subnet_key              = "app_workload_subnet_prefixes"
       service_connection_name = "${module.naming.private_service_connection.name}-mongodb"
       service_resource_id     = module.mongodb_atlas_config.atlas_pe_service_id
       is_manual_connection    = local.manual_connection
@@ -64,7 +64,7 @@ module "monitoring" {
   private_link_scope_name         = "ampls-${module.naming.log_analytics_workspace.name_unique}"
   vnet_id                         = module.network.vnet_id
   vnet_name                       = module.network.vnet_name
-  ampls_pe_subnet_id              = module.network.subnet_ids["monitoring_ampls"]
+  ampls_pe_subnet_id              = module.network.subnet_ids["private_endpoints"]
   pe_name                         = module.naming.private_endpoint.name_unique
   network_interface_name          = module.naming.network_interface.name_unique
   private_service_connection_name = module.naming.private_service_connection.name_unique
@@ -85,7 +85,7 @@ module "kv" {
   admin_object_id                      = data.azurerm_client_config.current.object_id
   open_access                          = var.open_access
   mongo_atlas_client_secret_expiration = local.mongo_atlas_client_secret_expiration
-  private_endpoint_subnet_id           = module.network.subnet_ids["keyvault_private_endpoint"]
+  private_endpoint_subnet_id           = module.network.subnet_ids["private_endpoints"]
   private_endpoint_name                = "${module.naming.private_endpoint.name_unique}kv"
   private_service_connection_name      = "${module.naming.private_service_connection.name_unique}kv"
   vnet_name                            = module.network.vnet_name
@@ -112,7 +112,7 @@ module "observability" {
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
-  storage_account_pe_subnet_id     = module.network.subnet_ids["observability_storage_account"]
+  storage_account_pe_subnet_id     = module.network.subnet_ids["private_endpoints"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
   blob_private_dns_zone_id         = module.monitoring.private_dns_zone_ids["blob"]
