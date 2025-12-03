@@ -24,12 +24,6 @@ variable "private_service_connection_name" {
   type        = string
 }
 
-variable "app_insights_connection_string" {
-  description = "Connection string for Application Insights (from monitoring module)"
-  type        = string
-  sensitive   = true
-}
-
 # Function App related variables
 variable "function_app_name" {
   description = "Name of the Azure Function App"
@@ -46,11 +40,27 @@ variable "storage_account_name" {
   type        = string
 }
 
+variable "app_insights_connection_string" {
+  description = "Connection string for the shared Application Insights instance provided by the monitoring module."
+  type        = string
+  sensitive   = true
+}
+
 # VNet related variables
 
 variable "vnet_id" {
   description = "ID of the Virtual Network to link the Private DNS Zone."
   type        = string
+}
+
+variable "blob_private_dns_zone_id" {
+  description = "ID of the privatelink.blob.core.windows.net DNS zone owned by the monitoring module."
+  type        = string
+
+  validation {
+    condition     = length(trimspace(var.blob_private_dns_zone_id)) > 0
+    error_message = "blob_private_dns_zone_id must be a non-empty DNS zone resource ID."
+  }
 }
 
 variable "storage_account_pe_subnet_id" {
@@ -98,25 +108,14 @@ variable "mongo_atlas_client_secret_kv_uri" {
   type        = string
 }
 
+variable "tags" {
+  description = "Tags applied to all observability resources."
+  type        = map(string)
+  default     = {}
+}
+
 variable "open_access" {
   description = "Allow open access during bootstrap? true=Allow, false=Deny for SFI"
   type        = bool
   default     = false
-}
-
-variable "create_blob_private_dns_zone" {
-  description = "Whether to create the privatelink.blob.core.windows.net DNS zone inside this module."
-  type        = bool
-  default     = true
-}
-
-variable "blob_private_dns_zone_id" {
-  description = "Existing privatelink.blob.core.windows.net DNS zone ID to reuse when create_blob_private_dns_zone is false."
-  type        = string
-  default     = null
-
-  validation {
-    condition     = var.create_blob_private_dns_zone || var.blob_private_dns_zone_id != null
-    error_message = "Provide blob_private_dns_zone_id when reusing an existing blob private DNS zone."
-  }
 }

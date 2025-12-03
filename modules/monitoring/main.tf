@@ -1,215 +1,76 @@
-resource "azurerm_log_analytics_workspace" "central" {
-  name                       = var.workspace_name
-  location                   = var.location
-  resource_group_name        = var.resource_group_name
-  sku                        = var.sku
-  retention_in_days          = var.retention_in_days
-  internet_ingestion_enabled = var.internet_ingestion_enabled
-  internet_query_enabled     = var.internet_query_enabled
-
-  tags = var.tags
-}
-
-# Application Insights for MongoDB metrics collection
-resource "azurerm_application_insights" "monitoring_appinsights" {
-  count                      = var.create_app_insights ? 1 : 0
-  name                       = var.app_insights_name
-  location                   = var.location
-  resource_group_name        = var.resource_group_name
-  workspace_id               = azurerm_log_analytics_workspace.central.id
-  application_type           = "web"
-  internet_ingestion_enabled = false
-
-  tags = var.tags
-}
-
-# Azure Monitor Private Link Scope for secure monitoring
 resource "azurerm_monitor_private_link_scope" "monitoring_pls" {
-  count                 = var.create_private_link_scope ? 1 : 0
   name                  = var.private_link_scope_name
-  resource_group_name   = var.resource_group_name
+  resource_group_name   = var.private_link_scope_resource_group_name
   ingestion_access_mode = "PrivateOnly"
-
-  tags = var.tags
+  tags                  = var.tags
 }
 
-# Link Application Insights to AMPLS
-resource "azurerm_monitor_private_link_scoped_service" "appinsights_assoc" {
-  count               = var.create_private_link_scope && var.create_app_insights ? 1 : 0
-  name                = "${var.app_insights_name}-ampls-association"
-  resource_group_name = var.resource_group_name
-  scope_name          = azurerm_monitor_private_link_scope.monitoring_pls[0].name
-  linked_resource_id  = azurerm_application_insights.monitoring_appinsights[0].id
+resource "azurerm_private_dns_zone" "monitoring" {
+  count = length(local.monitoring_dns_zone_definitions)
+
+  name                = values(local.monitoring_dns_zone_definitions)[count.index]
+  resource_group_name = var.private_link_scope_resource_group_name
+  tags                = var.tags
 }
 
-# Link Log Analytics Workspace to AMPLS
-resource "azurerm_monitor_private_link_scoped_service" "workspace_assoc" {
-  count               = var.create_private_link_scope ? 1 : 0
-  name                = "${var.workspace_name}-ampls-association"
-  resource_group_name = var.resource_group_name
-  scope_name          = azurerm_monitor_private_link_scope.monitoring_pls[0].name
-  linked_resource_id  = azurerm_log_analytics_workspace.central.id
-}
+resource "azurerm_private_dns_zone_virtual_network_link" "monitoring" {
+  count = length(local.monitoring_dns_zone_definitions)
 
-# Private DNS Zones for Azure Monitor (create only if requested)
-resource "azurerm_private_dns_zone" "oms" {
-  count = var.create_private_link_scope && var.create_private_dns_zones ? 1 : 0
-
-  name                = "privatelink.oms.opinsights.azure.com"
-  resource_group_name = var.resource_group_name
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone" "ods" {
-  count = var.create_private_link_scope && var.create_private_dns_zones ? 1 : 0
-
-  name                = "privatelink.ods.opinsights.azure.com"
-  resource_group_name = var.resource_group_name
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone" "monitor" {
-  count = var.create_private_link_scope && var.create_private_dns_zones ? 1 : 0
-
-  name                = "privatelink.monitor.azure.com"
-  resource_group_name = var.resource_group_name
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone" "agentsvc" {
-  count = var.create_private_link_scope && var.create_private_dns_zones ? 1 : 0
-
-  name                = "privatelink.agentsvc.azure-automation.net"
-  resource_group_name = var.resource_group_name
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone" "blob" {
-  count = var.create_private_link_scope && var.create_private_dns_zones ? 1 : 0
-
-  name                = "privatelink.blob.core.windows.net"
-  resource_group_name = var.resource_group_name
-
-  tags = var.tags
-}
-
-# Local to handle both scenarios: created vs. provided zones
-locals {
-  dns_zone_defaults = {
-    oms      = ""
-    ods      = ""
-    monitor  = ""
-    agentsvc = ""
-    blob     = ""
-  }
-
-  dns_zone_ids = var.create_private_link_scope ? (
-    var.create_private_dns_zones ? {
-      oms      = azurerm_private_dns_zone.oms[0].id
-      ods      = azurerm_private_dns_zone.ods[0].id
-      monitor  = azurerm_private_dns_zone.monitor[0].id
-      agentsvc = azurerm_private_dns_zone.agentsvc[0].id
-      blob     = azurerm_private_dns_zone.blob[0].id
-    } : var.private_dns_zone_ids != null ? var.private_dns_zone_ids : local.dns_zone_defaults
-  ) : local.dns_zone_defaults
-
-  # Extract zone names from IDs for linking
-  dns_zone_names = {
-    oms      = length(split("/", local.dns_zone_ids["oms"])) > 1 ? split("/", local.dns_zone_ids["oms"])[8] : ""
-    ods      = length(split("/", local.dns_zone_ids["ods"])) > 1 ? split("/", local.dns_zone_ids["ods"])[8] : ""
-    monitor  = length(split("/", local.dns_zone_ids["monitor"])) > 1 ? split("/", local.dns_zone_ids["monitor"])[8] : ""
-    agentsvc = length(split("/", local.dns_zone_ids["agentsvc"])) > 1 ? split("/", local.dns_zone_ids["agentsvc"])[8] : ""
-    blob     = length(split("/", local.dns_zone_ids["blob"])) > 1 ? split("/", local.dns_zone_ids["blob"])[8] : ""
-  }
-}
-
-# Link DNS zones to VNet
-resource "azurerm_private_dns_zone_virtual_network_link" "oms_link" {
-  count                 = var.create_private_link_scope ? 1 : 0
-  name                  = "${var.vnet_name}-oms-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = local.dns_zone_names["oms"]
+  name                  = "${var.vnet_name}-${count.index}-link"
+  resource_group_name   = var.private_link_scope_resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.monitoring[count.index].name
   virtual_network_id    = var.vnet_id
-
-  tags = var.tags
+  tags                  = var.tags
 }
 
-resource "azurerm_private_dns_zone_virtual_network_link" "ods_link" {
-  count                 = var.create_private_link_scope ? 1 : 0
-  name                  = "${var.vnet_name}-ods-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = local.dns_zone_names["ods"]
-  virtual_network_id    = var.vnet_id
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "monitor_link" {
-  count                 = var.create_private_link_scope ? 1 : 0
-  name                  = "${var.vnet_name}-monitor-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = local.dns_zone_names["monitor"]
-  virtual_network_id    = var.vnet_id
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "agentsvc_link" {
-  count                 = var.create_private_link_scope ? 1 : 0
-  name                  = "${var.vnet_name}-agentsvc-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = local.dns_zone_names["agentsvc"]
-  virtual_network_id    = var.vnet_id
-
-  tags = var.tags
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "blob_link" {
-  count                 = var.create_private_link_scope ? 1 : 0
-  name                  = "${var.vnet_name}-blob-link"
-  resource_group_name   = var.resource_group_name
-  private_dns_zone_name = local.dns_zone_names["blob"]
-  virtual_network_id    = var.vnet_id
-
-  tags = var.tags
-}
-
-# Private Endpoint for AMPLS
 resource "azurerm_private_endpoint" "monitoring_ampls_pe" {
-  count = var.create_private_link_scope && var.enable_ampls_pe ? 1 : 0
-
-  name                          = "${var.pe_name}-ampls"
+  name                          = "pep-${var.pe_name}-ampls"
   location                      = var.location
-  resource_group_name           = var.resource_group_name
-  subnet_id                     = var.ampls_pe_subnet_id
+  resource_group_name           = var.private_link_scope_resource_group_name
+  subnet_id                     = var.monitoring_ampls_subnet_id
   custom_network_interface_name = "${var.network_interface_name}-ampls"
+  tags                          = var.tags
 
   private_service_connection {
-    name                           = "${var.private_service_connection_name}-ampls"
-    private_connection_resource_id = azurerm_monitor_private_link_scope.monitoring_pls[0].id
+    name                           = "psc-${var.private_service_connection_name}-ampls"
+    private_connection_resource_id = azurerm_monitor_private_link_scope.monitoring_pls.id
     subresource_names              = ["azuremonitor"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name = "default"
-    private_dns_zone_ids = [
-      local.dns_zone_ids["oms"],
-      local.dns_zone_ids["ods"],
-      local.dns_zone_ids["monitor"],
-      local.dns_zone_ids["agentsvc"],
-      local.dns_zone_ids["blob"]
-    ]
+    name                 = "default"
+    private_dns_zone_ids = [for zone in azurerm_private_dns_zone.monitoring : zone.id]
   }
 
   depends_on = [
     azurerm_monitor_private_link_scoped_service.workspace_assoc,
     azurerm_monitor_private_link_scoped_service.appinsights_assoc
   ]
+}
 
-  tags = var.tags
+resource "azurerm_application_insights" "observability" {
+  name                       = var.app_insights_name
+  location                   = var.location
+  resource_group_name        = var.private_link_scope_resource_group_name
+  workspace_id               = var.workspace_id
+  application_type           = "web"
+  internet_ingestion_enabled = false
+  tags                       = var.tags
+}
+
+resource "azurerm_monitor_private_link_scoped_service" "appinsights_assoc" {
+  name                = "${var.app_insights_name}-ampls-association"
+  resource_group_name = var.private_link_scope_resource_group_name
+  scope_name          = azurerm_monitor_private_link_scope.monitoring_pls.name
+  linked_resource_id  = azurerm_application_insights.observability.id
+}
+
+resource "azurerm_monitor_private_link_scoped_service" "workspace_assoc" {
+  name                = var.ampls_assoc_name
+  resource_group_name = var.private_link_scope_resource_group_name
+  scope_name          = var.private_link_scope_name
+  linked_resource_id  = var.workspace_id
+
+  depends_on = [azurerm_monitor_private_link_scope.monitoring_pls]
 }

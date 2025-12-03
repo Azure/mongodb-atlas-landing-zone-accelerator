@@ -1,51 +1,14 @@
-variable "workspace_id" {
-  description = "ID of the Log Analytics workspace that will receive diagnostic data."
+variable "diagnostic_setting_name" {
+  description = "Name used for diagnostic settings."
   type        = string
 }
 
-variable "workspace_name" {
-  description = "Name of the Log Analytics workspace (used for diagnostic setting defaults)."
-  type        = string
-}
-
-variable "diagnostic_setting_name_prefix" {
-  description = "Optional base name used for diagnostic settings. Defaults to the workspace name."
-  type        = string
-  default     = null
-}
-
-variable "diagnostic_function_app_ids" {
-  description = "Map of friendly keys to Function App resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_key_vault_ids" {
-  description = "Map of friendly keys to Key Vault resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_storage_blob_service_ids" {
-  description = "Map of friendly keys to Storage Account Blob Service resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_storage_queue_service_ids" {
-  description = "Map of friendly keys to Storage Account Queue Service resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_storage_table_service_ids" {
-  description = "Map of friendly keys to Storage Account Table Service resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
-}
-
-variable "diagnostic_storage_file_service_ids" {
-  description = "Map of friendly keys to Storage Account File Service resource IDs requiring diagnostics."
-  type        = map(string)
-  default     = {}
+variable "diagnostic_targets" {
+  description = "Keys to diagnostic targets."
+  type = object({
+    workspace_id = string
+    resources = optional(map(object({
+      id = string
+    })), {})
+  })
 }

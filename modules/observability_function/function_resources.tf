@@ -16,6 +16,8 @@ resource "azurerm_storage_account" "observability_function_storage" {
   network_rules {
     default_action = "Deny"
   }
+
+  tags = var.tags
 }
 
 resource "azurerm_storage_container" "observability_function_container" {
@@ -30,6 +32,8 @@ resource "azurerm_service_plan" "observability_function_plan" {
   resource_group_name = var.resource_group_name
   sku_name            = "FC1"
   os_type             = "Linux"
+
+  tags = var.tags
 }
 
 resource "azurerm_function_app_flex_consumption" "observability_function" {
@@ -73,6 +77,8 @@ resource "azurerm_function_app_flex_consumption" "observability_function" {
   }
 
   public_network_access_enabled = var.open_access
+
+  tags = var.tags
 
   # Ignore changes to Application Insights connection string and Storage account settings managed by Azure
   lifecycle {

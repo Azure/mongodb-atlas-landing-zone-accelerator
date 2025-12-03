@@ -42,13 +42,11 @@ locals {
       app_workload_subnet_prefixes               = v.app_workload_subnet_prefixes
       app_workload_subnet_name                   = v.app_workload_subnet_name
       manual_connection                          = true
-      deploy_observability_subnets               = v.deploy_observability_subnets
-      has_keyvault_private_endpoint              = v.has_keyvault_private_endpoint
-      has_observability_storage_account          = v.has_observability_storage_account
-      observability_function_app_subnet_prefixes = v.deploy_observability_subnets ? v.observability_function_app_subnet_prefixes : null
-      observability_function_app_subnet_name     = v.deploy_observability_subnets ? v.observability_function_app_subnet_name : null
-      private_endpoints_subnet_prefixes          = (v.deploy_observability_subnets || v.has_keyvault_private_endpoint || v.has_observability_storage_account) ? v.private_endpoints_subnet_prefixes : null
-      private_endpoints_subnet_name              = (v.deploy_observability_subnets || v.has_keyvault_private_endpoint || v.has_observability_storage_account) ? v.private_endpoints_subnet_name : null
+      deploy_observability_function              = v.deploy_observability_function
+      observability_function_app_subnet_prefixes = v.deploy_observability_function ? v.observability_function_app_subnet_prefixes : null
+      observability_function_app_subnet_name     = v.deploy_observability_function ? v.observability_function_app_subnet_name : null
+      private_endpoints_subnet_prefixes          = (v.deploy_observability_function) ? v.private_endpoints_subnet_prefixes : null
+      private_endpoints_subnet_name              = (v.deploy_observability_function) ? v.private_endpoints_subnet_name : null
     }
   }
 
@@ -62,6 +60,7 @@ locals {
   purge_protection_enabled             = true
   soft_delete_retention_days           = 7
 
+  ## Monitoring configuration
   # Log Analytics Workspace configuration
   log_analytics_workspace_sku                        = "PerGB2018"
   log_analytics_workspace_retention_in_days          = 30
@@ -162,7 +161,7 @@ locals {
         address_prefixes = region.app_workload_subnet_prefixes
         security_rules   = merge(local.common_security_rules, local.specific_security_rules)
       }
-      observability_function_app = region.deploy_observability_subnets ? {
+      observability_function_app = region.deploy_observability_function ? {
         name             = region.observability_function_app_subnet_name
         address_prefixes = region.observability_function_app_subnet_prefixes
         security_rules   = merge(local.common_security_rules, local.specific_security_rules)
@@ -175,9 +174,7 @@ locals {
         }
       } : null
       private_endpoints = (
-        region.deploy_observability_subnets ||
-        region.has_keyvault_private_endpoint ||
-        region.has_observability_storage_account
+        region.deploy_observability_function
         ) ? {
         name             = region.private_endpoints_subnet_name
         address_prefixes = region.private_endpoints_subnet_prefixes

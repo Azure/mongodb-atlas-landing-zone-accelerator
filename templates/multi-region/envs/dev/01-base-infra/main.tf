@@ -1,5 +1,10 @@
 data "azurerm_client_config" "current" {}
 
+data "azurerm_resource_group" "infrastructure_rgs" {
+  for_each = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
+  name     = each.value.name
+}
+
 module "mongodb_atlas_config" {
   source                   = "../../../../../modules/atlas_config_multi_region"
   org_id                   = local.org_id
@@ -69,50 +74,6 @@ module "vnet_peerings" {
   use_remote_gateways     = false
 }
 
-# Create monitoring infrastructure per region
-module "monitoring" {
-  for_each = local.regions
-  source   = "../../../../../modules/monitoring"
-
-  # Unique names per region
-  workspace_name            = "${module.naming.log_analytics_workspace.name_unique}-${each.key}"
-  app_insights_name         = "${module.naming.application_insights.name_unique}-${each.key}"
-  private_link_scope_name   = "ampls-${module.naming.log_analytics_workspace.name_unique}-${each.key}"
-  create_app_insights       = each.key == "zoneA"
-  create_private_link_scope = each.key == "zoneA"
-
-  # Regional configuration
-  location            = each.value.location
-  resource_group_name = data.azurerm_resource_group.infrastructure_rgs[each.key].name
-
-  # VNet configuration (required for DNS zone links)
-  vnet_id   = module.network[each.key].vnet_id
-  vnet_name = module.network[each.key].vnet_name
-
-  # AMPLS PE configuration (only for zones with monitoring subnets)
-  enable_ampls_pe    = each.key == "zoneA" && each.value.deploy_observability_subnets
-  ampls_pe_subnet_id = each.value.deploy_observability_subnets ? module.network[each.key].subnet_ids["private_endpoints"] : null
-
-  # DNS zones: Create in first region (zoneA), reuse in others
-  create_private_dns_zones = each.key == "zoneA"
-  private_dns_zone_ids     = each.key != "zoneA" ? module.monitoring["zoneA"].private_dns_zone_ids : null
-
-  # PE naming
-  pe_name                         = "${module.naming.private_endpoint.name_unique}-${each.key}"
-  network_interface_name          = "${module.naming.network_interface.name_unique}-${each.key}"
-  private_service_connection_name = "${module.naming.private_service_connection.name_unique}-${each.key}"
-
-  # LAW configuration
-  sku                        = local.log_analytics_workspace_sku
-  retention_in_days          = local.log_analytics_workspace_retention_in_days
-  internet_ingestion_enabled = local.log_analytics_workspace_internet_ingestion_enabled
-  internet_query_enabled     = true
-
-  tags = local.tags
-
-  depends_on = [module.network]
-}
-
 module "kv" {
   source                               = "../../../../../modules/keyvault"
   resource_group_name                  = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
@@ -132,14 +93,14 @@ module "kv" {
   soft_delete_retention_days           = local.soft_delete_retention_days
 }
 
-module "observability" {
-  source                           = "../../../../../modules/observability"
+module "observability_function" {
+  source                           = "../../../../../modules/observability_function"
   resource_group_name              = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
   location                         = local.regions["zoneA"].location
-  app_insights_connection_string   = module.monitoring["zoneA"].app_insights_connection_string
   function_app_name                = module.naming.function_app.name_unique
   service_plan_name                = module.naming.app_service_plan.name_unique
   storage_account_name             = module.naming.storage_account.name_unique
+  app_insights_connection_string   = module.monitoring.app_insights_connection_string
   mongo_atlas_client_id            = local.mongo_atlas_client_id
   mongo_group_name                 = local.project_name
   function_subnet_id               = module.network["zoneA"].subnet_ids["observability_function_app"]
@@ -147,69 +108,91 @@ module "observability" {
   network_interface_name           = module.naming.network_interface.name_unique
   private_service_connection_name  = module.naming.private_service_connection.name_unique
   vnet_id                          = module.network["zoneA"].vnet_id
+  blob_private_dns_zone_id         = module.monitoring.private_dns_zone_ids["blob"]
   function_frequency_cron          = var.function_frequency_cron
   mongodb_included_metrics         = var.mongodb_included_metrics
   mongodb_excluded_metrics         = var.mongodb_excluded_metrics
   storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["private_endpoints"]
   mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
   open_access                      = var.open_access
-  blob_private_dns_zone_id         = module.monitoring["zoneA"].private_dns_zone_ids["blob"]
-  create_blob_private_dns_zone     = false
-
-  depends_on = [
-    module.network,
-    module.vnet_peerings,
-    module.monitoring
-  ]
-}
-
-data "azurerm_resource_group" "infrastructure_rgs" {
-  for_each = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure
-  name     = each.value.name
-}
-
-# Diagnostic settings for all Azure resources
-module "monitoring_diagnostics" {
-  source = "../../../../../modules/monitoring_diagnostics"
-
-  workspace_id   = module.monitoring["zoneA"].workspace_id
-  workspace_name = module.monitoring["zoneA"].workspace_name
-
-  diagnostic_setting_name_prefix = module.naming.monitor_diagnostic_setting.name
-
-  diagnostic_function_app_ids = {
-    observability = module.observability.function_app_id
-  }
-
-  diagnostic_key_vault_ids = {
-    core = module.kv.key_vault_id
-  }
-
-  diagnostic_storage_blob_service_ids = {
-    observability = module.observability.storage_blob_service_id
-  }
-
-  diagnostic_storage_queue_service_ids = {
-    observability = module.observability.storage_queue_service_id
-  }
-
-  diagnostic_storage_table_service_ids = {
-    observability = module.observability.storage_table_service_id
-  }
-
-  diagnostic_storage_file_service_ids = {
-    observability = module.observability.storage_file_service_id
-  }
-  depends_on = [
-    module.monitoring,
-    module.network,
-    module.observability,
-    module.kv
-  ]
+  tags                             = local.tags
 }
 
 resource "azurerm_role_assignment" "function_app_kv_rbac" {
   scope                = module.kv.key_vault_id
   role_definition_name = "Key Vault Secrets User"
-  principal_id         = module.observability.function_app_identity_principal_id
+  principal_id         = module.observability_function.function_app_identity_principal_id
+}
+
+# --- Log Analytics Workspaces (one per region) ---
+resource "azurerm_log_analytics_workspace" "regional" {
+  for_each = local.regions
+
+  name                       = "${module.naming.log_analytics_workspace.name_unique}-${each.key}"
+  location                   = each.value.location
+  resource_group_name        = data.azurerm_resource_group.infrastructure_rgs[each.key].name
+  sku                        = local.log_analytics_workspace_sku
+  retention_in_days          = local.log_analytics_workspace_retention_in_days
+  internet_ingestion_enabled = local.log_analytics_workspace_internet_ingestion_enabled
+  internet_query_enabled     = true
+  tags                       = local.tags
+}
+
+module "monitoring" {
+  source = "../../../../../modules/monitoring"
+
+  workspace_id                           = azurerm_log_analytics_workspace.regional["zoneA"].id
+  ampls_assoc_name                       = "${azurerm_log_analytics_workspace.regional["zoneA"].name}-ampls-association"
+  app_insights_name                      = module.naming.application_insights.name_unique
+  location                               = local.regions["zoneA"].location
+  private_link_scope_name                = "ampls-${module.naming.log_analytics_workspace.name_unique}"
+  private_link_scope_resource_group_name = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
+  monitoring_ampls_subnet_id             = module.network["zoneA"].subnet_ids["private_endpoints"]
+  pe_name                                = module.naming.private_endpoint.name_unique
+  network_interface_name                 = module.naming.network_interface.name_unique
+  private_service_connection_name        = module.naming.private_service_connection.name_unique
+  vnet_id                                = module.network["zoneA"].vnet_id
+  vnet_name                              = module.network["zoneA"].vnet_name
+
+  tags = local.tags
+
+  depends_on = [module.network]
+}
+
+# --- Associate additional regional workspaces with shared AMPLS ---
+resource "azurerm_monitor_private_link_scoped_service" "workspace_assoc_regional" {
+  for_each = { for k, v in local.regions : k => v if !v.deploy_observability_function }
+
+  name                = "${azurerm_log_analytics_workspace.regional[each.key].name}-ampls-association"
+  resource_group_name = module.monitoring.ampls_scope_resource_group_name
+  scope_name          = module.monitoring.ampls_scope_name
+  linked_resource_id  = azurerm_log_analytics_workspace.regional[each.key].id
+
+  depends_on = [module.monitoring]
+}
+
+# Diagnostic settings for all Azure resources
+module "monitoring_diagnostics" {
+  source   = "../../../../../modules/monitoring_diagnostics"
+  for_each = local.regions
+
+  diagnostic_setting_name = "${module.naming.monitor_diagnostic_setting.name_unique}-${each.key}"
+  diagnostic_targets = {
+    workspace_id = azurerm_log_analytics_workspace.regional[each.key].id
+    resources = each.value.deploy_observability_function ? {
+      function_app_observability  = { id = module.observability_function.function_app_id }
+      key_vault_core              = { id = module.kv.key_vault_id }
+      storage_blob_observability  = { id = module.observability_function.storage_blob_service_id }
+      storage_queue_observability = { id = module.observability_function.storage_queue_service_id }
+      storage_table_observability = { id = module.observability_function.storage_table_service_id }
+      storage_file_observability  = { id = module.observability_function.storage_file_service_id }
+    } : {}
+  }
+
+  depends_on = [
+    module.monitoring,
+    module.network,
+    module.observability_function,
+    module.kv
+  ]
 }

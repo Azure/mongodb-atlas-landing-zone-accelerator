@@ -67,36 +67,30 @@ locals {
       app_workload_subnet_name                   = "${module.infrastructure_naming["zoneA"].subnet.name_unique}-mongodb-app-workload-endpoint"
       observability_function_app_subnet_name     = "${module.infrastructure_naming["zoneA"].subnet.name_unique}-function-app"
       private_endpoints_subnet_name              = "${module.infrastructure_naming["zoneA"].subnet.name_unique}-shared-private-endpoints"
-      deploy_observability_subnets               = true
-      has_keyvault_private_endpoint              = true
-      has_observability_storage_account          = true
+      deploy_observability_function              = true
       node_count                                 = 2
     }
     zoneB = {
-      atlas_region                      = local.regions["zoneB"].atlas_region
-      azure_region                      = local.regions["zoneB"].azure_region
-      priority                          = 6
-      address_space                     = ["10.0.0.128/27"]
-      app_workload_subnet_prefixes      = ["10.0.0.128/28"]
-      test_app_subnet_prefixes          = ["10.0.0.144/28"] # This subnet is for step 2, which is optional and used to validate the connection with the cluster.
-      app_workload_subnet_name          = "${module.infrastructure_naming["zoneB"].subnet.name_unique}-mongodb-app-workload-endpoint"
-      deploy_observability_subnets      = false
-      has_keyvault_private_endpoint     = false
-      has_observability_storage_account = false
-      node_count                        = 2
+      atlas_region                  = local.regions["zoneB"].atlas_region
+      azure_region                  = local.regions["zoneB"].azure_region
+      priority                      = 6
+      address_space                 = ["10.0.0.128/27"]
+      app_workload_subnet_prefixes  = ["10.0.0.128/28"]
+      test_app_subnet_prefixes      = ["10.0.0.144/28"] # This subnet is for step 2, which is optional and used to validate the connection with the cluster.
+      app_workload_subnet_name      = "${module.infrastructure_naming["zoneB"].subnet.name_unique}-mongodb-app-workload-endpoint"
+      deploy_observability_function = false
+      node_count                    = 2
     }
     zoneC = {
-      atlas_region                      = local.regions["zoneC"].atlas_region
-      azure_region                      = local.regions["zoneC"].azure_region
-      priority                          = 5
-      address_space                     = ["10.0.0.160/27"]
-      app_workload_subnet_prefixes      = ["10.0.0.160/28"]
-      test_app_subnet_prefixes          = ["10.0.0.176/28"] # This subnet is for step 2, which is optional and used to validate the connection with the cluster.
-      app_workload_subnet_name          = "${module.infrastructure_naming["zoneC"].subnet.name_unique}-mongodb-app-workload-endpoint"
-      deploy_observability_subnets      = false
-      has_keyvault_private_endpoint     = false
-      has_observability_storage_account = false
-      node_count                        = 1
+      atlas_region                  = local.regions["zoneC"].atlas_region
+      azure_region                  = local.regions["zoneC"].azure_region
+      priority                      = 5
+      address_space                 = ["10.0.0.160/27"]
+      app_workload_subnet_prefixes  = ["10.0.0.160/28"]
+      test_app_subnet_prefixes      = ["10.0.0.176/28"] # This subnet is for step 2, which is optional and used to validate the connection with the cluster.
+      app_workload_subnet_name      = "${module.infrastructure_naming["zoneC"].subnet.name_unique}-mongodb-app-workload-endpoint"
+      deploy_observability_function = false
+      node_count                    = 1
     }
   }
 }

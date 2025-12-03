@@ -5,7 +5,7 @@ This repository provides a modular Terraform solution for deploying a secure Mon
 - Private networking and secure connectivity
 - DevOps automation for remote state and identity
 - End-to-end cluster setup for MongoDB Atlas
-- Observability and monitoring with Azure Application Insights and a Metrics Function App
+- Observability function and monitoring with Azure Application Insights and a Metrics Function App
 - Automated infrastructure provisioning, Atlas cluster configuration, and a test application for validation
 
 > [!IMPORTANT]
@@ -55,7 +55,6 @@ Before deploying, determine the architecture that best fits your requirements an
 To avoid unexpected charges, **always clean up resources when you're done**.
 
 See [Cleanup.md](docs/wiki/Cleanup.md) for the full step-by-step cleanup procedure, including how to destroy Azure and MongoDB Atlas resources in the correct order.
-
 
 ---
 

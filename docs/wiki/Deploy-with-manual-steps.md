@@ -80,7 +80,7 @@ These `local.tfvars` files are for manual deployments.
 
 ### Base Infrastructure
 
-- **Purpose:** Provisions networking, MongoDB Atlas resources, and observability components.
+- **Purpose:** Provisions networking, MongoDB Atlas resources, and observability function components.
 - **Preparation:**  
   - In `01-base-infra/terraform.tf`, update the backend block using outputs from Step 00:
     ```hcl

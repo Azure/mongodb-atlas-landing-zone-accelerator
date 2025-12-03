@@ -45,7 +45,7 @@ output "regions_values" {
 }
 
 output "function_app_default_hostname" {
-  value       = module.observability.observability_function_default_hostname
+  value       = module.observability_function.observability_function_default_hostname
   description = "The default hostname of the Azure Function App"
 }
 

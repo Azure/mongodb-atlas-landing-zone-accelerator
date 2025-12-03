@@ -1,8 +1,9 @@
 locals {
-  workspace = {
-    id                  = azurerm_log_analytics_workspace.central.id
-    name                = azurerm_log_analytics_workspace.central.name
-    location            = azurerm_log_analytics_workspace.central.location
-    resource_group_name = azurerm_log_analytics_workspace.central.resource_group_name
+  monitoring_dns_zone_definitions = {
+    oms      = "privatelink.oms.opinsights.azure.com"
+    ods      = "privatelink.ods.opinsights.azure.com"
+    monitor  = "privatelink.monitor.azure.com"
+    agentsvc = "privatelink.agentsvc.azure-automation.net"
+    blob     = "privatelink.blob.core.windows.net"
   }
 }

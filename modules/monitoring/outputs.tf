@@ -1,52 +1,39 @@
-output "workspace_id" {
-  value       = local.workspace.id
-  description = "ID of the central Log Analytics workspace used for diagnostics"
-}
-
-output "workspace_name" {
-  value       = local.workspace.name
-  description = "Name of the central Log Analytics workspace used for diagnostics"
-}
-
-output "workspace_location" {
-  value       = local.workspace.location
-  description = "Location of the central Log Analytics workspace used for diagnostics"
-}
-
-output "workspace_resource_group_name" {
-  value       = local.workspace.resource_group_name
-  description = "Resource group name where the Log Analytics workspace resides"
-}
-
 output "app_insights_id" {
-  value       = var.create_app_insights ? azurerm_application_insights.monitoring_appinsights[0].id : null
-  description = "ID of the Application Insights instance"
+  value       = azurerm_application_insights.observability.id
+  description = "ID of the shared Application Insights instance."
 }
 
 output "app_insights_instrumentation_key" {
-  value       = var.create_app_insights ? azurerm_application_insights.monitoring_appinsights[0].instrumentation_key : null
-  description = "Instrumentation Key for Application Insights"
+  value       = azurerm_application_insights.observability.instrumentation_key
+  description = "Instrumentation key for the shared Application Insights instance."
   sensitive   = true
 }
 
 output "app_insights_connection_string" {
-  value       = var.create_app_insights ? azurerm_application_insights.monitoring_appinsights[0].connection_string : null
-  description = "Connection String for Application Insights"
+  value       = azurerm_application_insights.observability.connection_string
+  description = "Connection string for the shared Application Insights instance."
   sensitive   = true
 }
 
 output "ampls_id" {
-  value       = var.create_private_link_scope ? azurerm_monitor_private_link_scope.monitoring_pls[0].id : null
-  description = "ID of the Azure Monitor Private Link Scope"
+  value       = azurerm_monitor_private_link_scope.monitoring_pls.id
+  description = "ID of the Azure Monitor Private Link Scope."
+}
+
+output "ampls_scope_name" {
+  value       = var.private_link_scope_name
+  description = "Name of the Azure Monitor Private Link Scope used for workspace associations."
+}
+
+output "ampls_scope_resource_group_name" {
+  value       = var.private_link_scope_resource_group_name
+  description = "Resource group containing the Azure Monitor Private Link Scope used for workspace associations."
 }
 
 output "private_dns_zone_ids" {
-  value = var.create_private_link_scope && var.create_private_dns_zones ? {
-    oms      = azurerm_private_dns_zone.oms[0].id
-    ods      = azurerm_private_dns_zone.ods[0].id
-    monitor  = azurerm_private_dns_zone.monitor[0].id
-    agentsvc = azurerm_private_dns_zone.agentsvc[0].id
-    blob     = azurerm_private_dns_zone.blob[0].id
-  } : null
-  description = "Private DNS zone IDs created by this module (null if zones were not created)"
+  value = {
+    for idx, key in keys(local.monitoring_dns_zone_definitions) :
+    key => azurerm_private_dns_zone.monitoring[idx].id
+  }
+  description = "Private DNS zone IDs linked to the Azure Monitor private endpoint."
 }

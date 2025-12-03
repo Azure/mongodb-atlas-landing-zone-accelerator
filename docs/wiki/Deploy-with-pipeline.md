@@ -20,10 +20,10 @@ This guide shows you how to deploy infrastructure using the automated GitHub Act
 
 This repository provides two main GitHub Actions pipelines for infrastructure deployment:
 
-- **Single-Region:**
+- **Single-Region:**  
   Workflow: `.github/workflows/ci-cd-infra-dev-single-region.yml`
 
-- **Multi-Region:**
+- **Multi-Region:**  
   Workflow: `.github/workflows/ci-cd-infra-dev-multi-region.yml`
 
 Use the pipeline that matches your deployment scenario. Each pipeline automatically manages the correct folder paths and deployment steps.
@@ -32,11 +32,11 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
 
 ## Prerequisites
 
-- **Manual Step (Step 00: DevOps):**
-  You must run step 00-devops manually before starting the pipeline. This initializes the resource groups, storage, and permissions needed for the rest of the deployment.
+- **Manual Step (Step 00: DevOps):**  
+  You must run step 00-devops manually before starting the pipeline. This initializes the resource groups, storage, and permissions needed for the rest of the deployment.  
   - Path: `envs/dev/00-devops/` (single- or multi-region as appropriate)
   - For details on this manual step, see [DevOps Setup (Manual Prerequisite)](./Deploy-with-manual-steps.md#devops-setup-manual-prerequisite).
-- **Pipeline Environment Variables:**
+- **Pipeline Environment Variables:**  
   After running step 00-devops, set all required environment variables and GitHub secrets using the outputs. See [Setup-environment.md](Setup-environment.md#github-environment-requirements) for details.
 
 ---
@@ -47,8 +47,8 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
    - Make sure all required environment variables and secrets in GitHub are set using the outputs from step 00. See [Setup-environment.md](Setup-environment.md).
 
 2. **Base Infrastructure (Pipeline)**
-   - Deploys core networking, MongoDB Atlas resources, observability infrastructure, and, if multi-region, configures VNet peering.
-   - For details on observability and function app setup, see [Mongo Atlas Metrics App docs](./MongoAtlasMetrics_deployment_steps.md).
+   - Deploys core networking, MongoDB Atlas resources, observability function infrastructure, and, if multi-region, configures VNet peering.
+   - For details on observability function and function app setup, see [Mongo Atlas Metrics App docs](./MongoAtlasMetrics_deployment_steps.md).
    - **Important:** You need to run this step twice:
      1. **First run:** Set `TF_VAR_open_access=true` to allow Key Vault creation, initial secret injection and to deploy the Azure Function's code.
      2. **Second run:** Set `TF_VAR_open_access=false` to restrict Key Vault and Azure Function network access according to SFI/compliance requirements.
@@ -89,11 +89,11 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
 
 ## Choosing the Right Pipeline
 
-- **Single-Region:** `.github/workflows/ci-cd-infra-dev-single-region.yml`
+- **Single-Region:** `.github/workflows/ci-cd-infra-dev-single-region.yml`  
   — For deployments using `templates/single-region/envs/dev/`
-- **Multi-Region:** `.github/workflows/ci-cd-infra-dev-multi-region.yml`
+- **Multi-Region:** `.github/workflows/ci-cd-infra-dev-multi-region.yml`  
   — For deployments using `templates/multi-region/envs/dev/`
-- **App Code:** `.github/workflows/ci-cd-application.yml`
+- **App Code:** `.github/workflows/ci-cd-application.yml`  
   — For deploying the MongoAtlasMetrics Function App or Test DB Connection App
 
 ---
