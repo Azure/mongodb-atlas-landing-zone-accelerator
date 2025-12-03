@@ -30,12 +30,10 @@ This configuration creates:
 
 * **MongoDB Atlas Cluster**: Multi-region cluster with backup enabled by default, but it can be turned off if specified.
 * **Virtual Networks**: Dedicated VNets for each configured region.
-* **Private Subnets**: 
-  * Private subnet for MongoDB Atlas connectivity in each region
+* **App Workload Subnets**: 
+  * App workload subnet for MongoDB Atlas connectivity in each region
   * Function app subnet for observability resources (primary region only)
-  * Monitoring AMPLS subnet (primary region only)
-  * Key Vault private endpoint subnet (primary region only)
-  * Observability storage account subnet (primary region only)
+  * A single shared Private Endpoint subnet for all Azure Private Endpoints (Monitoring, Key Vault, Observability, etc.) (primary region only)
 * **VNet Peerings**: Connections between VNets across all regions for seamless communication.
 * **Private Endpoints**: Secure connections to MongoDB Atlas in each region.
 * **Monitoring Resources** (per region):
@@ -45,14 +43,14 @@ This configuration creates:
   * Private DNS Zones (created in primary region, linked to all regions)
 * **Azure Key Vault** (primary region): Secure storage for MongoDB Atlas client secret with:
   * Network ACL restrictions (configurable via `open_access` variable)
-  * Private endpoint for secure access
+  * Private endpoint for secure access (deployed into the shared Private Endpoint subnet)
   * Access policy for Function App managed identity
 * **Observability Resources** (primary region): Provisions infrastructure for centralized monitoring, including:
   * Storage Account
   * Service Plan
   * Function App (with system-assigned managed identity)
   * Private DNS Zones
-  * Private Endpoints
+  * Private Endpoints (all deployed into the shared Private Endpoint subnet)
   * After resource creation, you must deploy the metrics collection function code to the Function App. This function will securely connect to the MongoDB Atlas API using credentials stored in Key Vault, collect metrics, and send them to Application Insights for monitoring and analysis.
   * On the **first run** (resource creation), set `TF_VAR_open_access = true` in your `.tfvars` file to allow public access so the Azure Function code can be deployed successfully.
   * After resources have been created and code has been deployed, rerun with `TF_VAR_open_access = false` (recommended for all successive runs, including production) to restrict access to the Function App subnet only.
@@ -108,18 +106,20 @@ Region definitions are configured in Step 0 (`00-devops/locals.tf`) and passed t
 * **azure\_region**: Corresponding Azure region
 * **priority**: Region priority for Atlas cluster
 * **address\_space**: Virtual network address space
-* **private\_subnet\_prefixes**: Private subnet CIDR blocks
+* **app_workload_subnet_prefixes**: Prefixes for the application workload subnet (MongoDB connectivity)
+* **private\_endpoints\_subnet\_prefixes**: CIDR ranges for the shared Private Endpoint subnet used by all Azure PEs (Monitoring, Key Vault, Observability, etc.)
+* **observability\_function\_app\_subnet\_prefixes** (primary region only): Subnet for the Observability Function App
 * **node\_count**: Number of Atlas nodes in the region
-* **deploy\_observability\_subnets**: Whether to deploy observability-related subnets
-* **has\_keyvault\_private\_endpoint**: Whether to deploy Key Vault private endpoint subnet.
-* **has\_observability\_storage\_account**: Whether to deploy observability storage account subnet.
+* **deploy\_observability\_subnets**: Whether to deploy the shared Private Endpoint subnet for observability-related resources (e.g., Monitoring, Key Vault, Observability, etc.)
+* **has\_keyvault\_private\_endpoint**: Whether to deploy the shared Private Endpoint subnet for Key Vault private endpoint.
+* **has\_observability\_storage\_account**: Whether to deploy the shared Private Endpoint subnet for observability storage account.
 
 ### Networking Settings
 
 * **regions**: Contains Azure-specific configurations for each region, including:
   * **location**: Azure region.
   * **address\_space**: Address space for the virtual network.
-  * **private\_subnet\_prefixes**: Prefixes for private subnets.
+  * **app_workload_subnet_prefixes**: Prefixes for the application workload subnet (MongoDB connectivity)
   * **manual\_connection**: Indicates whether manual connection is required.
   * **observability\_function\_app\_subnet\_prefixes**: Prefixes fot Observability Function App.
   * **observability\_private\_endpoint\_subnet\_prefixes**: Prefixes for Observability private endpoint subnet.

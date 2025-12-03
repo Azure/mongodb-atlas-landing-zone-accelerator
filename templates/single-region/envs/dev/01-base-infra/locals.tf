@@ -120,9 +120,9 @@ locals {
   }
 
   subnets_definitions = {
-    private = {
+    app_workload_subnet_prefixes = {
       name             = local.region_definition.private_subnet_name
-      address_prefixes = local.region_definition.private_subnet_prefixes
+      address_prefixes = local.region_definition.app_workload_subnet_prefixes
       security_rules   = merge(local.common_security_rules, local.specific_security_rules)
     }
     observability_function_app = {
@@ -137,20 +137,9 @@ locals {
         }
       }
     }
-    monitoring_ampls = {
-      name             = local.region_definition.monitoring_ampls_subnet_name
-      address_prefixes = local.region_definition.monitoring_ampls_subnet_prefixes
-      security_rules   = local.common_security_rules
-    }
-    keyvault_private_endpoint = {
-      name              = local.region_definition.keyvault_private_endpoint_subnet_name
-      address_prefixes  = local.region_definition.keyvault_private_endpoint_subnet_prefixes
-      security_rules    = local.common_security_rules
-      service_endpoints = ["Microsoft.KeyVault"]
-    }
-    observability_storage_account = {
-      name             = local.region_definition.observability_storage_account_subnet_name
-      address_prefixes = local.region_definition.observability_storage_account_subnet_prefixes
+    private_endpoints = {
+      name             = local.region_definition.private_endpoints_subnet_name
+      address_prefixes = local.region_definition.private_endpoints_subnet_prefixes
       security_rules   = local.common_security_rules
     }
   }

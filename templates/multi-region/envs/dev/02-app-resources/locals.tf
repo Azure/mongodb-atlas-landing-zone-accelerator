@@ -11,7 +11,7 @@ locals {
       virtual_network_name     = data.terraform_remote_state.common.outputs.vnets[k].name
       vnet_resource_group_name = data.terraform_remote_state.common.outputs.vnets[k].resource_group_name
       subnet_name              = "${module.naming.subnet.name_unique}-${k}"
-      address_prefixes         = v.app_subnet_prefixes
+      address_prefixes         = v.test_app_subnet_prefixes
     }
   }
 
