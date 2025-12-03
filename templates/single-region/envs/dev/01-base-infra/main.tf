@@ -75,6 +75,37 @@ module "kv" {
   soft_delete_retention_days           = local.soft_delete_retention_days
 }
 
+# --- Log Analytics Workspace (single region) ---
+resource "azurerm_log_analytics_workspace" "regional" {
+  name                       = module.naming.log_analytics_workspace.name_unique
+  location                   = local.region_definition.azure_region
+  resource_group_name        = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure["unique"].name
+  sku                        = local.log_analytics_workspace_sku
+  retention_in_days          = local.log_analytics_workspace_retention_in_days
+  internet_ingestion_enabled = local.log_analytics_workspace_internet_ingestion_enabled
+  internet_query_enabled     = true
+  tags                       = local.tags
+}
+
+module "monitoring" {
+  source = "../../../../../modules/monitoring"
+
+  workspace_id                           = azurerm_log_analytics_workspace.regional.id
+  ampls_assoc_name                       = "${azurerm_log_analytics_workspace.regional.name}-ampls-association"
+  app_insights_name                      = module.naming.application_insights.name_unique
+  location                               = local.region_definition.azure_region
+  private_link_scope_name                = "ampls-${module.naming.log_analytics_workspace.name_unique}"
+  private_link_scope_resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
+  monitoring_ampls_subnet_id             = module.network.subnet_ids["private_endpoints"]
+  pe_name                                = module.naming.private_endpoint.name_unique
+  network_interface_name                 = module.naming.network_interface.name_unique
+  private_service_connection_name        = module.naming.private_service_connection.name_unique
+  vnet_id                                = module.network.vnet_id
+  vnet_name                              = module.network.vnet_name
+
+  tags = local.tags
+}
+
 module "observability_function" {
   source                           = "../../../../../modules/observability_function"
   resource_group_name              = data.azurerm_resource_group.infrastructure_rg.name
@@ -104,39 +135,6 @@ resource "azurerm_role_assignment" "function_app_kv_rbac" {
   scope                = module.kv.key_vault_id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = module.observability_function.function_app_identity_principal_id
-}
-
-
-# --- Log Analytics Workspace (single region) ---
-resource "azurerm_log_analytics_workspace" "regional" {
-  name                       = module.naming.log_analytics_workspace.name_unique
-  location                   = local.region_definition.azure_region
-  resource_group_name        = data.terraform_remote_state.devops.outputs.resource_group_names.infrastructure["unique"].name
-  sku                        = local.log_analytics_workspace_sku
-  retention_in_days          = local.log_analytics_workspace_retention_in_days
-  internet_ingestion_enabled = local.log_analytics_workspace_internet_ingestion_enabled
-  internet_query_enabled     = true
-  tags                       = local.tags
-}
-
-# --- Shared monitoring resources (AMPLS, DNS zones, App Insights, Private Endpoint) ---
-module "monitoring" {
-  source = "../../../../../modules/monitoring"
-
-  workspace_id                           = azurerm_log_analytics_workspace.regional.id
-  ampls_assoc_name                       = "${azurerm_log_analytics_workspace.regional.name}-ampls-association"
-  app_insights_name                      = module.naming.application_insights.name_unique
-  location                               = local.region_definition.azure_region
-  private_link_scope_name                = "ampls-${module.naming.log_analytics_workspace.name_unique}"
-  private_link_scope_resource_group_name = data.azurerm_resource_group.infrastructure_rg.name
-  monitoring_ampls_subnet_id             = module.network.subnet_ids["private_endpoints"]
-  pe_name                                = module.naming.private_endpoint.name_unique
-  network_interface_name                 = module.naming.network_interface.name_unique
-  private_service_connection_name        = module.naming.private_service_connection.name_unique
-  vnet_id                                = module.network.vnet_id
-  vnet_name                              = module.network.vnet_name
-
-  tags = local.tags
 }
 
 module "monitoring_diagnostics" {

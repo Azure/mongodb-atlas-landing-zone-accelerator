@@ -9,7 +9,6 @@ module "monitoring" {
   source   = "../../modules/monitoring"
 
   workspace_id                           = azurerm_log_analytics_workspace.regional["zoneA"].id
-  workspace_name                         = azurerm_log_analytics_workspace.regional["zoneA"].name
   app_insights_name                      = module.naming.application_insights.name_unique
   location                               = local.regions["zoneA"].location
   private_link_scope_name                = "ampls-${module.naming.log_analytics_workspace.name_unique}"
@@ -47,10 +46,6 @@ Downstream modules (observability, diagnostics) read each region’s workspace o
 ## Outputs
 | Name | Description |
 |------|-------------|
-| `workspace_id` | ID of the regional Log Analytics workspace used for diagnostics |
-| `workspace_name` | Name of the regional Log Analytics workspace used for diagnostics |
-| `workspace_location` | Location of the regional Log Analytics workspace used for diagnostics |
-| `workspace_resource_group_name` | Resource group name where the Log Analytics workspace resides |
 | `app_insights_id` | ID of the Application Insights instance (null when shared resources are not created) |
 | `app_insights_instrumentation_key` | Instrumentation key for Application Insights (sensitive, null when shared resources are not created) |
 | `app_insights_connection_string` | Connection string for Application Insights (sensitive, null when shared resources are not created) |

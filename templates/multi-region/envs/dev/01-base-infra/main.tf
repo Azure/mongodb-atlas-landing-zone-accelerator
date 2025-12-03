@@ -93,37 +93,6 @@ module "kv" {
   soft_delete_retention_days           = local.soft_delete_retention_days
 }
 
-module "observability_function" {
-  source                           = "../../../../../modules/observability_function"
-  resource_group_name              = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
-  location                         = local.regions["zoneA"].location
-  function_app_name                = module.naming.function_app.name_unique
-  service_plan_name                = module.naming.app_service_plan.name_unique
-  storage_account_name             = module.naming.storage_account.name_unique
-  app_insights_connection_string   = module.monitoring.app_insights_connection_string
-  mongo_atlas_client_id            = local.mongo_atlas_client_id
-  mongo_group_name                 = local.project_name
-  function_subnet_id               = module.network["zoneA"].subnet_ids["observability_function_app"]
-  pe_name                          = module.naming.private_endpoint.name_unique
-  network_interface_name           = module.naming.network_interface.name_unique
-  private_service_connection_name  = module.naming.private_service_connection.name_unique
-  vnet_id                          = module.network["zoneA"].vnet_id
-  blob_private_dns_zone_id         = module.monitoring.private_dns_zone_ids["blob"]
-  function_frequency_cron          = var.function_frequency_cron
-  mongodb_included_metrics         = var.mongodb_included_metrics
-  mongodb_excluded_metrics         = var.mongodb_excluded_metrics
-  storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["private_endpoints"]
-  mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
-  open_access                      = var.open_access
-  tags                             = local.tags
-}
-
-resource "azurerm_role_assignment" "function_app_kv_rbac" {
-  scope                = module.kv.key_vault_id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = module.observability_function.function_app_identity_principal_id
-}
-
 # --- Log Analytics Workspaces (one per region) ---
 resource "azurerm_log_analytics_workspace" "regional" {
   for_each = local.regions
@@ -157,6 +126,37 @@ module "monitoring" {
   tags = local.tags
 
   depends_on = [module.network]
+}
+
+module "observability_function" {
+  source                           = "../../../../../modules/observability_function"
+  resource_group_name              = data.azurerm_resource_group.infrastructure_rgs["zoneA"].name
+  location                         = local.regions["zoneA"].location
+  function_app_name                = module.naming.function_app.name_unique
+  service_plan_name                = module.naming.app_service_plan.name_unique
+  storage_account_name             = module.naming.storage_account.name_unique
+  app_insights_connection_string   = module.monitoring.app_insights_connection_string
+  mongo_atlas_client_id            = local.mongo_atlas_client_id
+  mongo_group_name                 = local.project_name
+  function_subnet_id               = module.network["zoneA"].subnet_ids["observability_function_app"]
+  pe_name                          = module.naming.private_endpoint.name_unique
+  network_interface_name           = module.naming.network_interface.name_unique
+  private_service_connection_name  = module.naming.private_service_connection.name_unique
+  vnet_id                          = module.network["zoneA"].vnet_id
+  blob_private_dns_zone_id         = module.monitoring.private_dns_zone_ids["blob"]
+  function_frequency_cron          = var.function_frequency_cron
+  mongodb_included_metrics         = var.mongodb_included_metrics
+  mongodb_excluded_metrics         = var.mongodb_excluded_metrics
+  storage_account_pe_subnet_id     = module.network["zoneA"].subnet_ids["private_endpoints"]
+  mongo_atlas_client_secret_kv_uri = module.kv.mongo_atlas_client_secret_uri
+  open_access                      = var.open_access
+  tags                             = local.tags
+}
+
+resource "azurerm_role_assignment" "function_app_kv_rbac" {
+  scope                = module.kv.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.observability_function.function_app_identity_principal_id
 }
 
 # --- Associate additional regional workspaces with shared AMPLS ---
