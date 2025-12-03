@@ -24,8 +24,6 @@ module "monitoring" {
 }
 ```
 
-Downstream modules (observability, diagnostics) read each region’s workspace outputs via `module.monitoring[region].workspace_*`.
-
 ## Inputs
 | Name | Description | Type | Default | Required |
 | --- | --- | --- | --- | --- |
@@ -53,40 +51,3 @@ Downstream modules (observability, diagnostics) read each region’s workspace o
 | `ampls_scope_name` | Name of the Azure Monitor Private Link Scope used for workspace associations |
 | `ampls_scope_resource_group_name` | Resource group containing the Azure Monitor Private Link Scope |
 | `private_dns_zone_ids` | Private DNS zone IDs created for the shared Azure Monitor private endpoint (empty map when not created) |
-
-## Deployment Order
-
-This module should be deployed **early in the infrastructure provisioning** sequence:
-
-1. `devops` - Resource groups, storage
-2. `network` - Virtual networks, subnets
-3. **`monitoring`** ← This module (creates Log Analytics workspace)
-4. `keyvault` - Key Vault with diagnostic settings
-5. `observability function` - App Insights, Function with diagnostic settings
-6. `application` - Web Apps with diagnostic settings
-
-## Best Practices
-
-### Workspace Design
-- Use **one workspace per environment** (dev, staging, prod) for data isolation
-- Co-locate workspace in the **same region** as monitored resources to reduce latency
-- Use **private ingestion** (`internet_ingestion_enabled = false`) for production security
-- Set appropriate **retention** based on compliance requirements (30-730 days)
-
-### Cost Management
-- **PerGB2018 SKU**: Pay-as-you-go pricing, best for most scenarios (~$2.76/GB)
-- **Commitment Tiers**: Consider 100GB, 200GB reservations for cost savings at scale
-- **Retention**: Default 30 days included, extended retention costs ~$0.12/GB/month
-- **Typical Monthly Cost**: $8-52 depending on data volume and retention settings
-
-### Multi-Region Considerations
-- Create **one workspace per region** for optimal performance and data residency
-- Or use **single workspace** if cross-region latency is acceptable (<100ms) and compliance permits
-- Secondary regions should populate `existing_monitoring_private_dns_zone_ids` with the outputs from the observability region to reuse the shared Azure Monitor DNS zones without recreating them. The primary region leaves this map empty to allow the module to create the shared resources.
-
-### Security & Compliance
-- Data encrypted at rest and in transit by default
-- Supports Azure Private Link for secure data ingestion
-- Integrates with Azure Monitor for unified observability
-- Supports Azure Policy for governance and compliance
-- Network access controls via `internet_ingestion_enabled` and `internet_query_enabled` settings

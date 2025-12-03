@@ -21,7 +21,7 @@ This Terraform module standardizes Azure Monitor diagnostic settings across the 
 module "monitoring_diagnostics" {
   source = "../../modules/monitoring_diagnostics"
   for_each = local.regions
-  
+
   diagnostic_setting_name = module.naming.monitor_diagnostic_setting.name_unique
 
   diagnostic_targets = {
@@ -58,7 +58,7 @@ Deploy this module after both the Log Analytics workspace and the target resourc
 ## Implementation Details
 
 ### Dynamic Category Discovery
-This module uses the `azurerm_monitor_diagnostic_categories` data source to discover all available log categories for each resource type. It automatically enables all discovered log categories, ensuring comprehensive diagnostic coverage without manual category enumeration.
+This module uses the `azurerm_monitor_diagnostic_categories` data source to discover all available log categories for each resource type. It automatically enables all discovered log categories, ensuring comprehensive, and probably excessive, diagnostic coverage without manual category enumeration.
 
 ### Resource-Specific Behavior
 - **Storage Sub-Services**: Separate diagnostic settings are created for blob, queue, table, and file services with prefixed naming (e.g., `-blob-`, `-queue-`, `-table-`, `-file-`).

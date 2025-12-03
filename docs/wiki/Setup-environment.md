@@ -73,7 +73,7 @@ These `local.tfvars` files will be used when deploying with manual steps.
 
 ### GitHub Environment Requirements
 
-Before running the pipeline, you must create a GitHub environment named `dev` in your repository settings.  
+Before running the pipeline, you must create a GitHub environment named `dev` in your repository settings.
 Follow the official [Creating a GitHub Environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) guide for detailed instructions.
 
 ---
@@ -116,7 +116,7 @@ In the `dev` environment, set the following secrets and variables:
 
 #### *Optional Variables (for Test DB Connection App)*
 
-*These variables are only required if deploying the test database connection application.  
+*These variables are only required if deploying the test database connection application.
 They must be configured **after running the Application pipeline step**, when app(s) are created and their names known.*
 
 | Name                          | Description                                                           | Sample Value                       |

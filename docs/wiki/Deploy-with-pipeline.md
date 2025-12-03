@@ -20,10 +20,10 @@ This guide shows you how to deploy infrastructure using the automated GitHub Act
 
 This repository provides two main GitHub Actions pipelines for infrastructure deployment:
 
-- **Single-Region:**  
+- **Single-Region:**
   Workflow: `.github/workflows/ci-cd-infra-dev-single-region.yml`
 
-- **Multi-Region:**  
+- **Multi-Region:**
   Workflow: `.github/workflows/ci-cd-infra-dev-multi-region.yml`
 
 Use the pipeline that matches your deployment scenario. Each pipeline automatically manages the correct folder paths and deployment steps.
@@ -32,11 +32,11 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
 
 ## Prerequisites
 
-- **Manual Step (Step 00: DevOps):**  
-  You must run step 00-devops manually before starting the pipeline. This initializes the resource groups, storage, and permissions needed for the rest of the deployment.  
+- **Manual Step (Step 00: DevOps):**
+  You must run step 00-devops manually before starting the pipeline. This initializes the resource groups, storage, and permissions needed for the rest of the deployment.
   - Path: `envs/dev/00-devops/` (single- or multi-region as appropriate)
   - For details on this manual step, see [DevOps Setup (Manual Prerequisite)](./Deploy-with-manual-steps.md#devops-setup-manual-prerequisite).
-- **Pipeline Environment Variables:**  
+- **Pipeline Environment Variables:**
   After running step 00-devops, set all required environment variables and GitHub secrets using the outputs. See [Setup-environment.md](Setup-environment.md#github-environment-requirements) for details.
 
 ---
@@ -89,11 +89,11 @@ Use the pipeline that matches your deployment scenario. Each pipeline automatica
 
 ## Choosing the Right Pipeline
 
-- **Single-Region:** `.github/workflows/ci-cd-infra-dev-single-region.yml`  
+- **Single-Region:** `.github/workflows/ci-cd-infra-dev-single-region.yml`
   — For deployments using `templates/single-region/envs/dev/`
-- **Multi-Region:** `.github/workflows/ci-cd-infra-dev-multi-region.yml`  
+- **Multi-Region:** `.github/workflows/ci-cd-infra-dev-multi-region.yml`
   — For deployments using `templates/multi-region/envs/dev/`
-- **App Code:** `.github/workflows/ci-cd-application.yml`  
+- **App Code:** `.github/workflows/ci-cd-application.yml`
   — For deploying the MongoAtlasMetrics Function App or Test DB Connection App
 
 ---
